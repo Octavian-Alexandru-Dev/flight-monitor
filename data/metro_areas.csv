@@ -1,0 +1,37 @@
+code,name,aliases,airports
+MIL,Milano,Milan|Milán|Mailand,MXP LIN BGY
+ROM,Roma,Rome|Rom,FCO CIA
+VCE,Venezia,Venice|Venedig,VCE TSF
+LON,Londra,London|Londres,LHR LGW STN LTN LCY SEN
+PAR,Parigi,Paris,CDG ORY BVA
+BRU,Bruxelles,Brussels|Brüssel|Brussel,BRU CRL
+STO,Stoccolma,Stockholm,ARN BMA NYO
+OSL,Oslo,,OSL TRF
+MOW,Mosca,Moscow|Moskau,SVO DME VKO
+IST,Istanbul,Costantinopoli,IST SAW
+REK,Reykjavik,Reykjavík,KEF RKV
+GLA,Glasgow,,GLA PIK
+TCI,Tenerife,,TFS TFN
+CAI,Il Cairo,Cairo|Cairo,CAI SPX
+DXB,Dubai,,DXB DWC
+NYC,New York,Nueva York,JFK EWR LGA
+WAS,Washington,,IAD DCA BWI
+CHI,Chicago,,ORD MDW
+LAX,Los Angeles,,LAX BUR LGB SNA ONT
+SFO,San Francisco,Bay Area,SFO OAK SJC
+MIA,Miami,,MIA FLL
+YTO,Toronto,,YYZ YTZ
+MEX,Città del Messico,Mexico City|Ciudad de México|Citta del Messico,MEX NLU
+SAO,San Paolo,São Paulo|Sao Paulo,GRU CGH VCP
+RIO,Rio de Janeiro,Rio,GIG SDU
+BUE,Buenos Aires,,EZE AEP
+TYO,Tokyo,Tokio,HND NRT
+OSA,Osaka,,KIX ITM UKB
+SPK,Sapporo,,CTS OKD
+SEL,Seul,Seoul,ICN GMP
+BJS,Pechino,Beijing|Peking,PEK PKX
+SHA,Shanghai,,PVG SHA
+TPE,Taipei,,TPE TSA
+BKK,Bangkok,,BKK DMK
+JKT,Giacarta,Jakarta,CGK HLP
+MEL,Melbourne,,MEL AVV
