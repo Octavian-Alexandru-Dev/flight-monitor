@@ -36,6 +36,8 @@ pub struct RunPoint {
     pub run_id: i64,
     pub at: DateTime<Utc>,
     pub best_price: Option<Decimal>,
+    pub queries_planned: i64,
+    pub queries_failed: i64,
 }
 
 struct Row {
@@ -121,7 +123,8 @@ impl Db {
     /// Price history of a search, oldest first.
     pub async fn run_points(&self, search_id: SearchId, limit: i64) -> Result<Vec<RunPoint>> {
         let mut rows = sqlx::query!(
-            r#"SELECT id AS "id!", started_at AS "started_at: DateTime<Utc>", best_price_cents
+            r#"SELECT id AS "id!", started_at AS "started_at: DateTime<Utc>", best_price_cents,
+                      queries_planned, queries_failed
                FROM search_runs WHERE search_id = ? ORDER BY started_at DESC, id DESC LIMIT ?"#,
             search_id.0,
             limit
@@ -135,6 +138,8 @@ impl Db {
                 run_id: r.id,
                 at: r.started_at,
                 best_price: r.best_price_cents.map(from_cents),
+                queries_planned: r.queries_planned,
+                queries_failed: r.queries_failed,
             })
             .collect())
     }

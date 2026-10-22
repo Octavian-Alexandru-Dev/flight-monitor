@@ -7,4 +7,4 @@ export DATABASE_URL="sqlite://$PWD/target/sqlx/dev.db"
 rm -f target/sqlx/dev.db*
 sqlx database create
 sqlx migrate run --source crates/storage/migrations
-SQLX_OFFLINE=false cargo sqlx prepare --workspace -- --all-targets
+SQLX_OFFLINE=false cargo sqlx prepare --workspace -- -p storage --all-targets

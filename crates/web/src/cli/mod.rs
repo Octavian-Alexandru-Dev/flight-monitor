@@ -10,6 +10,7 @@ use domain::{Iata, SearchDefinition, SearchId};
 
 use crate::config::Config;
 use crate::scheduler::{self, SchedulerSettings};
+use crate::server::{self, AppState, FormDefaults, LlmClient};
 use crate::{app, format};
 
 #[derive(Parser)]
@@ -118,12 +119,33 @@ impl Cli {
 
 async fn serve(config: Config) -> anyhow::Result<()> {
     let engine = app::engine(&config).await?;
-    let settings = SchedulerSettings {
-        daily_summary_hour: config.daily_summary_hour,
-        retention_days: config.retention_days,
+    let llm = config
+        .llm_url
+        .as_deref()
+        .filter(|url| !url.is_empty())
+        .map(|url| LlmClient::new(url, &config.llm_model))
+        .transpose()?;
+    let defaults = FormDefaults {
+        budget: config.default_budget,
+        poll_hours: config.default_poll_hours,
     };
-    tracing::info!("scheduler started");
-    scheduler::run(engine, settings).await;
+    let state = AppState::new(engine.clone(), defaults, llm);
+    tokio::spawn(scheduler::run(
+        engine,
+        SchedulerSettings {
+            daily_summary_hour: config.daily_summary_hour,
+            retention_days: config.retention_days,
+        },
+    ));
+    let listener = tokio::net::TcpListener::bind(config.bind)
+        .await
+        .with_context(|| format!("binding {}", config.bind))?;
+    tracing::info!("web interface on http://{}", config.bind);
+    axum::serve(listener, server::router(state))
+        .with_graceful_shutdown(async {
+            tokio::signal::ctrl_c().await.ok();
+        })
+        .await?;
     Ok(())
 }
 
@@ -157,7 +179,7 @@ async fn run_once(config: &Config, all: bool, search: Option<i64>) -> anyhow::Re
         };
         let best = run
             .best_price
-            .map_or_else(|| "—".to_string(), |p| format::price(p, &run.currency));
+            .map_or_else(|| "n/d".to_string(), |p| format::price(p, &run.currency));
         println!(
             "#{} {}: {best} ({} opzioni)",
             record.search.id.0,

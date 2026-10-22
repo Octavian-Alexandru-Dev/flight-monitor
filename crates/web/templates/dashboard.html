@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Ricerche · Flight Monitor{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Ricerche</h1>
+    <p class="lede">Il prezzo migliore trovato nell'ultimo controllo di ogni ricerca salvata.</p>
+  </div>
+</div>
+
+{% if !degraded.is_empty() %}
+<div class="banner banner-critical" role="alert">
+  <i class="ph ph-warning-octagon" aria-hidden="true"></i>
+  <div>
+    <strong>Fonte degradata: {{ degraded.join(", ") }}</strong>
+    <p>Alcuni prezzi potrebbero mancare. Un risultato vuoto non significa che non ci siano voli.</p>
+  </div>
+  <a class="banner-link" href="/providers">Dettagli</a>
+</div>
+{% endif %}
+
+{% if rows.is_empty() %}
+<section class="empty">
+  <i class="ph ph-airplane-in-flight" aria-hidden="true"></i>
+  <h2>Nessuna ricerca salvata</h2>
+  <p>Scegli aeroporti di partenza, destinazioni e date flessibili: il monitor controlla i prezzi in automatico e ti avvisa quando conviene comprare.</p>
+  <a class="btn btn-primary" href="/searches/new"><i class="ph ph-plus" aria-hidden="true"></i>Crea la prima ricerca</a>
+</section>
+{% else %}
+<ul class="search-list" role="list">
+  {% for row in rows %}
+  <li class="search-row{% if !row.active %} is-paused{% endif %}">
+    <a class="row-main" href="/searches/{{ row.id }}">
+      <span class="row-title">{{ row.name }}</span>
+      <span class="row-route">{{ row.route }}</span>
+      <span class="row-meta">{{ row.mode }} · {{ row.dates }}</span>
+    </a>
+    <div class="row-spark">{% if let Some(spark) = row.spark %}{{ spark|safe }}{% endif %}</div>
+    <div class="row-price">
+      {% if let Some(best) = row.best %}
+      <span class="price">{{ best }}</span>
+      {% else %}
+      <span class="price price-empty">Nessun prezzo</span>
+      {% endif %}
+      {% if let Some(d) = row.delta %}
+      <span class="delta {% if d.down %}down{% else %}up{% endif %}"><i class="ph {% if d.down %}ph-trend-down{% else %}ph-trend-up{% endif %}" aria-hidden="true"></i>{{ d.text }}</span>
+      {% endif %}
+    </div>
+    <div class="row-status">
+      <span class="schedule">{% if row.running %}<span class="live-dot" aria-hidden="true"></span>{% else %}<i class="ph {% if row.active %}ph-clock{% else %}ph-pause-circle{% endif %}" aria-hidden="true"></i>{% endif %}{{ row.schedule }}</span>
+      {% if let Some(problem) = row.trouble %}
+      <span class="trouble"><i class="ph ph-warning" aria-hidden="true"></i>{{ problem }}</span>
+      {% endif %}
+    </div>
+    <form class="row-actions" method="post" action="/searches/{{ row.id }}/run">
+      <input type="hidden" name="back" value="/">
+      <button class="btn btn-ghost btn-icon" type="submit" title="Controlla ora" aria-label="Controlla ora: {{ row.name }}"{% if row.running %} disabled{% endif %}><i class="ph ph-arrows-clockwise" aria-hidden="true"></i></button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<div class="split">
+  <section class="panel">
+    <h2 class="panel-title">Ultimi alert</h2>
+    {% if alerts.is_empty() %}
+    <p class="muted">Nessun alert inviato finora. Arriveranno quando un prezzo scende sotto le soglie delle tue ricerche.</p>
+    {% else %}
+    <ul class="alert-list" role="list">
+      {% for alert in alerts %}
+      <li>
+        <a href="/searches/{{ alert.search_id }}">{{ alert.search }}</a>
+        <span class="mono">{{ alert.price }}</span>
+        <span class="muted">{{ alert.reasons }} · {{ alert.when }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if !telegram %}
+    <p class="hint"><i class="ph ph-info" aria-hidden="true"></i><span>Telegram non è configurato: imposta <code>TELEGRAM_BOT_TOKEN</code> e <code>TELEGRAM_CHAT_ID</code> nel file <code>.env</code> per ricevere gli alert sul telefono.</span></p>
+    {% endif %}
+  </section>
+  <section class="panel">
+    <h2 class="panel-title">Fonti</h2>
+    <ul class="health-list" role="list">
+      {% for h in health %}
+      <li class="{% if h.ok %}ok{% else %}bad{% endif %}">
+        <i class="ph {% if h.ok %}ph-check-circle{% else %}ph-x-circle{% endif %}" aria-hidden="true"></i>
+        <span class="health-name">{{ h.name }}</span>
+        <span class="health-state">{% if h.ok %}Operativa{% else %}Degradata{% endif %}</span>
+        <span class="muted health-detail">{{ h.detail }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

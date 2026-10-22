@@ -1,0 +1,13 @@
+<div class="field loc" data-loc hx-get="/geo/preview" hx-trigger="input delay:300ms, change, load" hx-include="this" hx-vals='{"prefix": "{{ field.prefix }}"}' hx-target="#{{ field.prefix }}-preview" hx-sync="this:replace">
+  <label for="{{ field.prefix }}_value">{{ field.label }}</label>
+  <div class="loc-inputs">
+    <select name="{{ field.prefix }}_kind" aria-label="Tipo di luogo per {{ field.label }}" data-kind>
+      {% for k in field.kinds %}<option value="{{ k.0 }}"{% if k.0 == field.kind.as_str() %} selected{% endif %}>{{ k.1 }}</option>{% endfor %}
+    </select>
+    <input id="{{ field.prefix }}_value" name="{{ field.prefix }}_value" value="{{ field.value }}" list="suggest-{{ field.prefix }}" autocomplete="off" spellcheck="false" aria-describedby="{{ field.prefix }}-help{% if field.error.is_some() %} {{ field.prefix }}-error{% endif %}"{% if field.error.is_some() %} aria-invalid="true"{% endif %}>
+  </div>
+  <datalist id="suggest-{{ field.prefix }}"></datalist>
+  <p class="help" id="{{ field.prefix }}-help">{{ field.help }}</p>
+  {% if let Some(e) = field.error %}<p class="field-error" id="{{ field.prefix }}-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+  <div class="preview" id="{{ field.prefix }}-preview" aria-live="polite"></div>
+</div>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}Flight Monitor{% endblock %}</title>
+  <link rel="preload" href="/static/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/icons.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232a78d6'/%3E%3Cpath d='M8 19l16-7-3 9-4-3-3 4v-5z' fill='%23fff'/%3E%3C/svg%3E">
+  <script src="/static/htmx.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Vai al contenuto</a>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/"><i class="ph ph-airplane-tilt" aria-hidden="true"></i><span>Flight Monitor</span></a>
+      <nav class="mainnav" aria-label="Principale">
+        <a href="/" {% if nav == "searches" %}aria-current="page"{% endif %}>Ricerche</a>
+        <a href="/providers" {% if nav == "providers" %}aria-current="page"{% endif %}>Fonti</a>
+      </nav>
+      {% if nav != "new" %}
+      <a class="btn btn-primary" href="/searches/new"><i class="ph ph-plus" aria-hidden="true"></i><span>Nuova ricerca</span></a>
+      {% endif %}
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

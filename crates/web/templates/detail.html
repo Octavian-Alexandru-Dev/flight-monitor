@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}{{ name }} · Flight Monitor{% endblock %}
+{% block content %}
+<a class="back-link" href="/"><i class="ph ph-arrow-left" aria-hidden="true"></i>Ricerche</a>
+
+<div class="page-head">
+  <div>
+    <h1>{{ name }}{% if !active %} <span class="pill">In pausa</span>{% endif %}</h1>
+    <p class="lede">{{ route }}</p>
+    <p class="meta">{{ mode }} · {{ dates }}</p>
+  </div>
+  <div class="actions">
+    <form method="post" action="/searches/{{ id }}/run" hx-post="/searches/{{ id }}/run" hx-target="#run-status" hx-swap="innerHTML">
+      <button class="btn btn-primary" type="submit"{% if running %} disabled{% endif %}><i class="ph ph-arrows-clockwise" aria-hidden="true"></i>Controlla ora</button>
+    </form>
+    <a class="btn" href="/searches/{{ id }}/edit"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Modifica</a>
+    <form method="post" action="/searches/{{ id }}/toggle">
+      <button class="btn" type="submit">{% if active %}<i class="ph ph-pause" aria-hidden="true"></i>Pausa{% else %}<i class="ph ph-play" aria-hidden="true"></i>Riprendi{% endif %}</button>
+    </form>
+    <form method="post" action="/searches/{{ id }}/delete" data-confirm="Eliminare la ricerca «{{ name }}» e tutto il suo storico?">
+      <button class="btn btn-ghost btn-danger btn-icon" type="submit" title="Elimina" aria-label="Elimina ricerca"><i class="ph ph-trash" aria-hidden="true"></i></button>
+    </form>
+  </div>
+</div>
+
+<div id="run-status" aria-live="polite">{% if running %}{% include "partials/run_status.html" %}{% endif %}</div>
+
+{% if !has_run %}
+<section class="empty empty-compact">
+  <i class="ph ph-hourglass-medium" aria-hidden="true"></i>
+  <h2>Primo controllo in arrivo</h2>
+  <p>Il monitor sta interrogando le fonti. I risultati compaiono qui appena il ciclo termina: di solito bastano pochi minuti.</p>
+  <div class="skeleton-stack" aria-hidden="true"><span></span><span></span><span></span></div>
+</section>
+{% else %}
+
+{% if source_down %}
+<div class="banner banner-critical" role="alert">
+  <i class="ph ph-warning-octagon" aria-hidden="true"></i>
+  <div>
+    <strong>Nessun prezzo perché la fonte non ha risposto</strong>
+    <p>Non significa che non ci siano voli: riprova più tardi o controlla lo stato delle <a href="/providers">fonti</a>.</p>
+  </div>
+</div>
+{% endif %}
+{% if let Some(warning) = partial_failure %}
+<div class="banner banner-warning" role="status">
+  <i class="ph ph-warning" aria-hidden="true"></i>
+  <div><p>{{ warning }}</p></div>
+</div>
+{% endif %}
+
+<section class="overview" aria-label="Riepilogo">
+  <div class="hero-figure">
+    <span class="label">Prezzo migliore</span>
+    {% if let Some(price) = best %}
+    <span class="figure">{{ price }}</span>
+    {% else %}
+    <span class="figure figure-empty">Nessuna opzione</span>
+    {% endif %}
+    <div class="figure-notes">
+      {% if let Some(d) = delta %}
+      <span class="delta {% if d.down %}down{% else %}up{% endif %}"><i class="ph {% if d.down %}ph-trend-down{% else %}ph-trend-up{% endif %}" aria-hidden="true"></i>{{ d.text }} dall'ultimo controllo</span>
+      {% endif %}
+      {% if let Some(door) = door_to_door %}
+      <span class="muted">{{ door }} porta a porta</span>
+      {% endif %}
+    </div>
+  </div>
+  <dl class="facts">
+    <div><dt>Minimo storico</dt><dd>{% if let Some(min) = historic_min %}{{ min }}{% else %}-{% endif %}</dd></div>
+    <div><dt>Ultimo controllo</dt><dd>{% if let Some(last) = last_run %}{{ last }}{% else %}-{% endif %}</dd></div>
+    <div><dt>Prossimo</dt><dd>{{ next_run }}</dd></div>
+    <div><dt>Ciclo</dt><dd>{{ queries }}</dd></div>
+  </dl>
+  {% if let Some(a) = advice %}
+  <div class="advice advice-{{ a.tone }}">
+    <i class="ph {{ a.icon }}" aria-hidden="true"></i>
+    <div>
+      <strong>{{ a.label }}</strong>
+      <p>{{ a.reason }}</p>
+    </div>
+  </div>
+  {% endif %}
+</section>
+
+{% if chart.is_none() %}
+<p class="hint history-hint"><i class="ph ph-info" aria-hidden="true"></i><span>L'andamento del prezzo compare dal secondo controllo in poi.</span></p>
+{% endif %}
+{% if let Some(svg) = chart %}
+<section class="panel">
+  <h2 class="panel-title">Andamento del prezzo migliore</h2>
+  <div class="chart-wrap" data-chart>
+    {{ svg|safe }}
+    <div class="chart-tip" role="status" hidden><strong></strong><span></span></div>
+  </div>
+  <details class="data-table">
+    <summary>Mostra i dati</summary>
+    <table>
+      <thead><tr><th scope="col">Controllo</th><th scope="col" class="num">Prezzo migliore</th></tr></thead>
+      <tbody>
+        {% for row in history %}
+        <tr><td>{{ row.0 }}</td><td class="num">{{ row.1 }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+</section>
+{% endif %}
+
+{% if let Some(grid) = calendar %}
+<section class="panel">
+  <h2 class="panel-title">Calendario prezzi</h2>
+  <p class="muted panel-sub">Il prezzo migliore per ogni combinazione di date trovata nell'ultimo controllo.</p>
+  {{ grid|safe }}
+</section>
+{% endif %}
+
+<section class="options-section">
+  <h2 class="section-title">Migliori opzioni</h2>
+  {% if options.is_empty() %}
+  <div class="empty empty-compact">
+    <i class="ph ph-funnel-simple" aria-hidden="true"></i>
+    <p>Nessuna opzione rispetta i filtri impostati in questo ciclo. Prova ad allargare scali, orari o date dalla pagina di modifica.</p>
+  </div>
+  {% else %}
+  <ol class="options" role="list">
+    {% for o in options %}
+    <li class="option">
+      <div class="option-head">
+        <span class="option-price">{{ o.price }}</span>
+        {% if let Some(door) = o.door_to_door %}<span class="muted">{{ door }} porta a porta</span>{% endif %}
+        <span class="option-dates">{{ o.dates }}</span>
+        {% if o.separate_tickets %}<span class="tag">Biglietti separati</span>{% endif %}
+      </div>
+      {% for traveler in o.travelers %}
+      <div class="traveler">
+        {% if o.travelers.len() > 1 %}<h3 class="traveler-name"><i class="ph ph-user" aria-hidden="true"></i>{{ traveler.name }}</h3>{% endif %}
+        {% for t in traveler.tickets %}
+        <div class="ticket">
+          <span class="ticket-dir">{{ t.direction }}</span>
+          <div class="ticket-main">
+            <div class="ticket-times">
+              <strong>{{ t.depart }}</strong>
+              <i class="ph ph-arrow-right" aria-hidden="true"></i>
+              <strong>{{ t.arrive }}</strong>{% if t.plus_days > 0 %}<sup class="plus">+{{ t.plus_days }}</sup>{% endif %}
+              <span class="ticket-route mono">{{ t.route }}</span>
+            </div>
+            <div class="ticket-meta">
+              <span>{{ t.duration }}</span>
+              <span>{{ t.stops }}{% if !t.layovers.is_empty() %}: {{ t.layovers }}{% endif %}</span>
+              <span>{{ t.airlines }}</span>
+              <span class="mono">{{ t.flights }}</span>
+            </div>
+          </div>
+          <div class="ticket-buy">
+            {% if o.multiple_tickets %}<span class="mono">{{ t.price }}</span>{% endif %}
+            {% if t.round_trip_fare %}<span class="muted">tariffa A/R</span>{% endif %}
+            {% if let Some(url) = t.url %}
+            <a class="btn btn-small" href="{{ url }}" target="_blank" rel="noopener noreferrer">Apri<i class="ph ph-arrow-square-out" aria-hidden="true"></i></a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+      {% if !o.warnings.is_empty() %}
+      <ul class="warnings" role="list">
+        {% for w in o.warnings %}
+        <li class="{% if w.risk %}risk{% else %}info{% endif %}"><i class="ph {% if w.risk %}ph-warning{% else %}ph-info{% endif %}" aria-hidden="true"></i>{{ w.text }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% if more_options > 0 %}<p class="muted">Altre {{ more_options }} opzioni più care non mostrate.</p>{% endif %}
+  {% endif %}
+</section>
+
+{% endif %}
+
+<section class="panel settings">
+  <div>
+    <h2 class="panel-title">Filtri</h2>
+    <ul class="chips" role="list">{% for s in settings %}<li class="chip">{{ s }}</li>{% endfor %}</ul>
+  </div>
+  <div>
+    <h2 class="panel-title">Alert</h2>
+    {% if alert_rules.is_empty() %}
+    <p class="muted">Nessun alert attivo.</p>
+    {% else %}
+    <ul class="chips" role="list">{% for a in alert_rules %}<li class="chip"><i class="ph ph-bell" aria-hidden="true"></i>{{ a }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

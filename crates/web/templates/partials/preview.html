@@ -1,0 +1,3 @@
+{% if !chips.is_empty() %}<ul class="chips chips-airports" role="list" aria-label="Aeroporti inclusi">{% for c in chips %}<li class="chip"><b>{{ c.code }}</b>{% if !c.name.is_empty() %} {{ c.name }}{% endif %}</li>{% endfor %}{% if more > 0 %}<li class="chip chip-more">+{{ more }} aeroporti</li>{% endif %}</ul>{% endif %}
+{% if let Some(m) = message %}<p class="hint"><i class="ph ph-info" aria-hidden="true"></i><span>{{ m }}</span></p>{% endif %}
+<datalist id="suggest-{{ prefix }}" hx-swap-oob="true">{% for s in suggestions %}<option value="{{ s.value }}">{{ s.label }}</option>{% endfor %}</datalist>

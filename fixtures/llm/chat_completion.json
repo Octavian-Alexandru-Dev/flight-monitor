@@ -1,0 +1,17 @@
+{
+  "id": "chatcmpl-417",
+  "object": "chat.completion",
+  "created": 1792692000,
+  "model": "llama3.1",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\"name\": \"Giappone a dicembre\", \"origin_kind\": \"airports\", \"origin_value\": \"REG, SUF, CTA\", \"dest_kind\": \"country\", \"dest_value\": \"JP\", \"mode\": \"round_trip_decoupled\", \"date_from\": \"2026-12-01\", \"date_to\": \"2026-12-15\", \"stay_min\": \"10\", \"stay_max\": \"14\", \"max_stops\": 1, \"max_layover_h\": \"6\", \"alert_below\": \"700\"}\n```"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 512, "completion_tokens": 96, "total_tokens": 608 }
+}

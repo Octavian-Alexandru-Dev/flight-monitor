@@ -124,12 +124,32 @@ impl GeoIndex {
         self.airports.get(code)
     }
 
+    pub fn nearest(&self, lat: f64, lon: f64) -> Option<&Airport> {
+        self.airports
+            .values()
+            .filter(|a| a.is_major())
+            .min_by(|a, b| a.distance_km(lat, lon).total_cmp(&b.distance_km(lat, lon)))
+    }
+
     pub fn airport_count(&self) -> usize {
         self.airports.len()
     }
 
     pub fn country_name(&self, code: &str) -> Option<&str> {
         self.countries.get(code).map(String::as_str)
+    }
+
+    /// Country code from an ISO code or an English country name.
+    pub fn country_code(&self, input: &str) -> Option<String> {
+        let upper = input.trim().to_ascii_uppercase();
+        if self.countries.contains_key(&upper) {
+            return Some(upper);
+        }
+        let needle = fold(input);
+        self.countries
+            .iter()
+            .find(|(_, name)| fold(name) == needle)
+            .map(|(code, _)| code.clone())
     }
 
     pub fn airline_name(&self, code: &str) -> Option<&str> {

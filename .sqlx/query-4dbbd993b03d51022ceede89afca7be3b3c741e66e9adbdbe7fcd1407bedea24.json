@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id AS \"id!\", started_at AS \"started_at: DateTime<Utc>\", best_price_cents\n               FROM search_runs WHERE search_id = ? ORDER BY started_at DESC, id DESC LIMIT ?",
+  "query": "SELECT id AS \"id!\", started_at AS \"started_at: DateTime<Utc>\", best_price_cents,\n                      queries_planned, queries_failed\n               FROM search_runs WHERE search_id = ? ORDER BY started_at DESC, id DESC LIMIT ?",
   "describe": {
     "columns": [
       {
@@ -35,6 +35,28 @@
             "name": "best_price_cents"
           }
         }
+      },
+      {
+        "name": "queries_planned",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "queries_planned"
+          }
+        }
+      },
+      {
+        "name": "queries_failed",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "queries_failed"
+          }
+        }
       }
     ],
     "parameters": {
@@ -43,8 +65,10 @@
     "nullable": [
       false,
       false,
-      true
+      true,
+      false,
+      false
     ]
   },
-  "hash": "26fc23b052bb9170f7ad51838e4e0592528786672e56966568917bd5105c6f5b"
+  "hash": "4dbbd993b03d51022ceede89afca7be3b3c741e66e9adbdbe7fcd1407bedea24"
 }

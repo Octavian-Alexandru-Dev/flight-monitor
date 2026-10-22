@@ -1,0 +1,35 @@
+@font-face { font-family: "Phosphor"; src: url("/static/icons.woff2") format("woff2"); font-weight: normal; font-style: normal; font-display: block; }
+.ph { font-family: "Phosphor" !important; speak: never; font-style: normal; font-weight: normal; font-variant: normal; text-transform: none; line-height: 1; -webkit-font-smoothing: antialiased; }
+.ph.ph-airplane-in-flight:before { content: "\e4fe"; }
+.ph.ph-airplane-tilt:before { content: "\e5d6"; }
+.ph.ph-arrow-left:before { content: "\e058"; }
+.ph.ph-arrow-right:before { content: "\e06c"; }
+.ph.ph-arrow-square-out:before { content: "\e5de"; }
+.ph.ph-arrows-clockwise:before { content: "\e094"; }
+.ph.ph-bell:before { content: "\e0ce"; }
+.ph.ph-bell-slash:before { content: "\e0d4"; }
+.ph.ph-check:before { content: "\e182"; }
+.ph.ph-check-circle:before { content: "\e184"; }
+.ph.ph-clock:before { content: "\e19a"; }
+.ph.ph-compass:before { content: "\e1c8"; }
+.ph.ph-eye:before { content: "\e220"; }
+.ph.ph-funnel-simple:before { content: "\e268"; }
+.ph.ph-hourglass-medium:before { content: "\e2b8"; }
+.ph.ph-info:before { content: "\e2ce"; }
+.ph.ph-paper-plane-tilt:before { content: "\e398"; }
+.ph.ph-pause:before { content: "\e39e"; }
+.ph.ph-pause-circle:before { content: "\e3a0"; }
+.ph.ph-pencil-simple:before { content: "\e3b4"; }
+.ph.ph-play:before { content: "\e3d0"; }
+.ph.ph-plus:before { content: "\e3d4"; }
+.ph.ph-shopping-cart-simple:before { content: "\e420"; }
+.ph.ph-sparkle:before { content: "\e6a2"; }
+.ph.ph-trash:before { content: "\e4a6"; }
+.ph.ph-trend-down:before { content: "\e4ac"; }
+.ph.ph-trend-up:before { content: "\e4ae"; }
+.ph.ph-user:before { content: "\e4c2"; }
+.ph.ph-warning:before { content: "\e4e0"; }
+.ph.ph-warning-circle:before { content: "\e4e2"; }
+.ph.ph-warning-octagon:before { content: "\e4e4"; }
+.ph.ph-x:before { content: "\e4f6"; }
+.ph.ph-x-circle:before { content: "\e4f8"; }

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Flight Monitor{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ cancel }}"><i class="ph ph-arrow-left" aria-hidden="true"></i>Annulla</a>
+<div class="page-head">
+  <div>
+    <h1>{{ title }}</h1>
+    <p class="lede">Più la ricerca è flessibile, più query servono: la stima a lato si aggiorna mentre compili.</p>
+  </div>
+</div>
+
+{% if let Some(n) = notice %}
+<div class="banner banner-info" role="status"><i class="ph ph-sparkle" aria-hidden="true"></i><div><p>{{ n }}</p></div></div>
+{% endif %}
+
+{% if llm %}
+<form class="nl-form panel" method="post" action="/searches/parse">
+  <label for="nl-text">Descrivi la ricerca a parole</label>
+  <div class="nl-row">
+    <textarea id="nl-text" name="text" rows="2" placeholder="Es. da Reggio, Lamezia o Catania verso il Giappone a dicembre, 10-14 notti, massimo uno scalo, avvisami sotto 700 euro" required></textarea>
+    <button class="btn" type="submit"><i class="ph ph-sparkle" aria-hidden="true"></i>Compila</button>
+  </div>
+  <p class="help">Usa il modello locale configurato in <code>FM_LLM_URL</code>. Controlla sempre i campi prima di salvare.</p>
+</form>
+{% endif %}
+
+{% if let Some(general) = errors.general %}
+<div class="banner banner-critical" role="alert"><i class="ph ph-warning-circle" aria-hidden="true"></i><div><strong>La ricerca non è valida</strong><p>{{ general }}</p></div></div>
+{% else if !errors.fields.is_empty() %}
+<div class="banner banner-critical" role="alert"><i class="ph ph-warning-circle" aria-hidden="true"></i><div><strong>Controlla i campi evidenziati</strong><p>{{ errors.fields.len() }} campi da correggere.</p></div></div>
+{% endif %}
+
+<div class="form-layout">
+<form id="search-form" class="search-form" method="post" action="{{ action }}" novalidate>
+
+  <fieldset class="panel">
+    <legend>Itinerario</legend>
+    <div class="field">
+      <label for="name">Nome</label>
+      <input id="name" name="name" value="{{ form.name }}" placeholder="Es. Giappone a dicembre" required{% if self.error("name").is_some() %} aria-invalid="true" aria-describedby="name-error"{% endif %}>
+      {% if let Some(e) = self.error("name") %}<p class="field-error" id="name-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+    </div>
+    {% let field = self.location("origin") %}{% include "partials/location.html" %}
+    {% let field = self.location("dest") %}{% include "partials/location.html" %}
+
+    <div class="field" role="radiogroup" aria-labelledby="mode-label">
+      <span class="label" id="mode-label">Tipo di viaggio</span>
+      <div class="segmented">
+        <label><input type="radio" name="mode" value="one_way"{% if form.mode == "one_way" %} checked{% endif %}><span><strong>Solo andata</strong><small>Una tratta</small></span></label>
+        <label><input type="radio" name="mode" value="round_trip_decoupled"{% if form.mode == "round_trip_decoupled" %} checked{% endif %}><span><strong>A/R libero</strong><small>Andata e ritorno separati, combinati al meglio</small></span></label>
+        <label><input type="radio" name="mode" value="round_trip_coupled"{% if form.mode == "round_trip_coupled" %} checked{% endif %}><span><strong>A/R abbinato</strong><small>Tariffa unica, conviene con le compagnie tradizionali</small></span></label>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="date_from">Partenza dal</label>
+        <input id="date_from" name="date_from" type="date" value="{{ form.date_from }}" required{% if self.error("date_from").is_some() %} aria-invalid="true"{% endif %}>
+        {% if let Some(e) = self.error("date_from") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="date_to">al <span class="optional">(facoltativo)</span></label>
+        <input id="date_to" name="date_to" type="date" value="{{ form.date_to }}"{% if self.error("date_to").is_some() %} aria-invalid="true"{% endif %}>
+        {% if let Some(e) = self.error("date_to") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="grid-2" data-round-trip>
+      <div class="field">
+        <label for="stay_min">Notti minime</label>
+        <input id="stay_min" name="stay_min" type="number" min="0" inputmode="numeric" value="{{ form.stay_min }}">
+        {% if let Some(e) = self.error("stay_min") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="stay_max">Notti massime</label>
+        <input id="stay_max" name="stay_max" type="number" min="0" inputmode="numeric" value="{{ form.stay_max }}">
+        {% if let Some(e) = self.error("stay_max") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="passengers">Passeggeri</label>
+        <input id="passengers" name="passengers" type="number" min="1" max="9" inputmode="numeric" value="{{ form.passengers }}">
+        {% if let Some(e) = self.error("passengers") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="currency">Valuta</label>
+        <input id="currency" name="currency" value="{{ form.currency }}" maxlength="3" autocapitalize="characters" spellcheck="false">
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="panel">
+    <legend>Vincoli sul volo</legend>
+    <div class="grid-3">
+      <div class="field">
+        <label for="max_stops">Scali massimi</label>
+        <input id="max_stops" name="max_stops" type="number" min="0" max="3" inputmode="numeric" value="{{ form.max_stops }}">
+        {% if let Some(e) = self.error("max_stops") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="min_layover_h">Scalo minimo (ore)</label>
+        <input id="min_layover_h" name="min_layover_h" inputmode="decimal" value="{{ form.min_layover_h }}" placeholder="1:30">
+        {% if let Some(e) = self.error("min_layover_h") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="max_layover_h">Scalo massimo (ore)</label>
+        <input id="max_layover_h" name="max_layover_h" inputmode="decimal" value="{{ form.max_layover_h }}" placeholder="8">
+        {% if let Some(e) = self.error("max_layover_h") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="max_total_h">Durata massima (ore)</label>
+        <input id="max_total_h" name="max_total_h" inputmode="decimal" value="{{ form.max_total_h }}" placeholder="24">
+        {% if let Some(e) = self.error("max_total_h") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="checked_bags">Bagagli in stiva</label>
+        <input id="checked_bags" name="checked_bags" type="number" min="0" max="2" inputmode="numeric" value="{{ form.checked_bags }}">
+        <p class="help">Il costo viene incluso nel prezzo.</p>
+      </div>
+      <div class="field">
+        <label for="max_price">Prezzo massimo</label>
+        <input id="max_price" name="max_price" inputmode="decimal" value="{{ form.max_price }}" placeholder="Nessun limite">
+        {% if let Some(e) = self.error("max_price") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="excluded_airlines">Compagnie escluse</label>
+        <input id="excluded_airlines" name="excluded_airlines" value="{{ form.excluded_airlines }}" placeholder="FR, W6" spellcheck="false">
+        <p class="help">Codici IATA a due caratteri.</p>
+        {% if let Some(e) = self.error("excluded_airlines") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="excluded_hours">Orari di partenza esclusi</label>
+        <input id="excluded_hours" name="excluded_hours" value="{{ form.excluded_hours }}" placeholder="00:00-06:00" spellcheck="false">
+        <p class="help">Fasce separate da virgola; 22:00-06:00 attraversa la mezzanotte.</p>
+        {% if let Some(e) = self.error("excluded_hours") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="panel">
+    <legend>Monitoraggio e alert</legend>
+    <div class="grid-3">
+      <div class="field">
+        <label for="poll_hours">Controlla ogni (ore)</label>
+        <input id="poll_hours" name="poll_hours" inputmode="decimal" value="{{ form.poll_hours }}">
+        {% if let Some(e) = self.error("poll_hours") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="budget">Query massime per ciclo</label>
+        <input id="budget" name="budget" type="number" min="1" inputmode="numeric" value="{{ form.budget }}">
+        {% if let Some(e) = self.error("budget") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field field-check">
+        <label><input type="checkbox" name="adaptive" {{ self.checked("adaptive") }}><span>Frequenza adattiva</span></label>
+        <p class="help">Più spesso vicino alla partenza o con prezzi instabili.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="alert_below">Avvisami sotto (prezzo)</label>
+        <input id="alert_below" name="alert_below" inputmode="decimal" value="{{ form.alert_below }}" placeholder="Es. 650">
+        {% if let Some(e) = self.error("alert_below") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="alert_drop">Avvisami se cala di almeno (%)</label>
+        <input id="alert_drop" name="alert_drop" inputmode="decimal" value="{{ form.alert_drop }}" placeholder="Es. 10">
+        {% if let Some(e) = self.error("alert_drop") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" name="alert_new_min" {{ self.checked("alert_new_min") }}><span>Nuovo minimo storico</span></label>
+      <label><input type="checkbox" name="alert_anomaly" {{ self.checked("alert_anomaly") }}><span>Prezzo anomalo (molto sotto la media storica)</span></label>
+    </div>
+  </fieldset>
+
+  <details class="panel advanced"{% if self.advanced_open() %} open{% endif %}>
+    <summary><span>Opzioni avanzate</span><small>Open-jaw, hub e stopover, viaggi di gruppo, costo porta a porta</small></summary>
+
+    <h3 class="sub-legend">Open-jaw</h3>
+    <p class="help">Rientra da un'altra città o verso un altro aeroporto. Richiede A/R libero.</p>
+    <div class="grid-2">
+      {% let field = self.location("return_origin") %}{% include "partials/location.html" %}
+      {% let field = self.location("return_dest") %}{% include "partials/location.html" %}
+    </div>
+
+    <h3 class="sub-legend">Hub, biglietti separati e stopover</h3>
+    <p class="help">Combina biglietti separati via un hub. Connessioni oltre 20 ore diventano uno stopover voluto.</p>
+    {% let field = self.location("via") %}{% include "partials/location.html" %}
+    <div class="grid-2">
+      <div class="field">
+        <label for="via_min_h">Connessione minima (ore)</label>
+        <input id="via_min_h" name="via_min_h" inputmode="decimal" value="{{ form.via_min_h }}">
+        {% if let Some(e) = self.error("via_min_h") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="via_max_h">Connessione massima (ore)</label>
+        <input id="via_max_h" name="via_max_h" inputmode="decimal" value="{{ form.via_max_h }}">
+        {% if let Some(e) = self.error("via_max_h") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+
+    <h3 class="sub-legend">Viaggio di gruppo</h3>
+    <div class="field">
+      <label for="companions">Compagni che partono da altre città</label>
+      <textarea id="companions" name="companions" rows="3" placeholder="Giulia: Torino&#10;Luca: BRI">{{ form.companions }}</textarea>
+      <p class="help">Una persona per riga, nel formato «Nome: città o aeroporti».</p>
+      {% if let Some(e) = self.error("companions") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="group_goal">Obiettivo</label>
+        <select id="group_goal" name="group_goal">
+          <option value="min_cost" {{ self.selected("group_goal", "min_cost") }}>Costo totale minimo</option>
+          <option value="align" {{ self.selected("group_goal", "align") }}>Arrivi allineati</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="group_spread_h">Scarto massimo tra gli arrivi (ore)</label>
+        <input id="group_spread_h" name="group_spread_h" inputmode="decimal" value="{{ form.group_spread_h }}">
+      </div>
+    </div>
+
+    <h3 class="sub-legend">Costo porta a porta</h3>
+    <div class="grid-2">
+      <div class="field">
+        <label for="access_costs">Costo per raggiungere gli aeroporti</label>
+        <input id="access_costs" name="access_costs" value="{{ form.access_costs }}" placeholder="FCO=25, BGY=40" spellcheck="false">
+        <p class="help">Per tratta: viene sommato all'andata e al ritorno.</p>
+        {% if let Some(e) = self.error("access_costs") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="overnight_cost">Pernottamento per scalo notturno</label>
+        <input id="overnight_cost" name="overnight_cost" inputmode="decimal" value="{{ form.overnight_cost }}" placeholder="Es. 60">
+        {% if let Some(e) = self.error("overnight_cost") %}<p class="field-error"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ e }}</p>{% endif %}
+      </div>
+    </div>
+  </details>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit"><i class="ph ph-check" aria-hidden="true"></i>{{ submit }}</button>
+    <a class="btn btn-ghost" href="{{ cancel }}">Annulla</a>
+  </div>
+</form>
+
+<aside class="estimate panel" aria-labelledby="estimate-title">
+  <h2 class="panel-title" id="estimate-title">Stima per ciclo</h2>
+  <div id="estimate" hx-post="/searches/estimate" hx-trigger="input delay:600ms from:#search-form, change from:#search-form" hx-include="#search-form" hx-sync="this:replace" aria-live="polite">
+    {{ estimate|safe }}
+  </div>
+</aside>
+</div>
+{% endblock %}

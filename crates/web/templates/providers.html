@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Fonti · Flight Monitor{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Fonti</h1>
+    <p class="lede">Stato delle fonti dati e ultime query eseguite. Una fonte degradata viene segnalata anche su Telegram.</p>
+  </div>
+</div>
+
+<div class="provider-grid">
+  {% for h in health %}
+  <section class="panel provider {% if h.ok %}ok{% else %}bad{% endif %}">
+    <div class="provider-head">
+      <i class="ph {% if h.ok %}ph-check-circle{% else %}ph-x-circle{% endif %}" aria-hidden="true"></i>
+      <h2>{{ h.name }}</h2>
+      <span class="status-label">{% if h.ok %}Operativa{% else %}Degradata{% endif %}</span>
+    </div>
+    <p class="muted">{{ h.detail }}</p>
+  </section>
+  {% endfor %}
+  <section class="panel provider">
+    <div class="provider-head">
+      <i class="ph {% if telegram %}ph-paper-plane-tilt{% else %}ph-bell-slash{% endif %}" aria-hidden="true"></i>
+      <h2>Telegram</h2>
+      <span class="status-label">{% if telegram %}Configurato{% else %}Non configurato{% endif %}</span>
+    </div>
+    <p class="muted">{% if telegram %}Alert, degradi delle fonti e riepilogo giornaliero vengono inviati al bot.{% else %}Imposta TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID nel file .env.{% endif %}</p>
+  </section>
+</div>
+
+<section class="panel">
+  <h2 class="panel-title">Ultime query</h2>
+  <p class="muted panel-sub">{{ airports }} aeroporti commerciali nel dataset di riferimento.</p>
+  {% if runs.is_empty() %}
+  <p class="muted">Nessuna query eseguita finora.</p>
+  {% else %}
+  <div class="table-scroll">
+    <table class="data">
+      <thead>
+        <tr><th scope="col">Quando</th><th scope="col">Fonte</th><th scope="col">Query</th><th scope="col">Esito</th><th scope="col" class="num">Risultati</th><th scope="col" class="num">Durata</th></tr>
+      </thead>
+      <tbody>
+        {% for r in runs %}
+        <tr>
+          <td class="nowrap">{{ r.when }}</td>
+          <td class="nowrap">{{ r.provider }}</td>
+          <td class="mono">{{ r.description }}</td>
+          <td><span class="outcome {% if r.ok %}ok{% else %}bad{% endif %}"><i class="ph {% if r.ok %}ph-check{% else %}ph-x{% endif %}" aria-hidden="true"></i>{{ r.outcome }}</span></td>
+          <td class="num">{{ r.results }}</td>
+          <td class="num nowrap">{{ r.duration }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

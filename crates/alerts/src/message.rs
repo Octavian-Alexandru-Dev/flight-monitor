@@ -137,7 +137,7 @@ pub fn daily_summary(lines: &[SummaryLine], degraded: &[String]) -> String {
     for line in lines {
         let price = line
             .best
-            .map_or_else(|| "—".to_string(), |p| money(p, &line.currency));
+            .map_or_else(|| "n/d".to_string(), |p| money(p, &line.currency));
         let change = match (line.best, line.day_before) {
             (Some(now), Some(before)) if now < before => {
                 format!(" ▼ {}", money(before - now, &line.currency))

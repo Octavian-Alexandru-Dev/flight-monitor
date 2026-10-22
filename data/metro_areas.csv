@@ -26,7 +26,7 @@ SAO,San Paolo,São Paulo|Sao Paulo,GRU CGH VCP
 RIO,Rio de Janeiro,Rio,GIG SDU
 BUE,Buenos Aires,,EZE AEP
 TYO,Tokyo,Tokio,HND NRT
-OSA,Osaka,,KIX ITM UKB
+OSA,Osaka,Kyoto|Kobe,KIX ITM UKB
 SPK,Sapporo,,CTS OKD
 SEL,Seul,Seoul,ICN GMP
 BJS,Pechino,Beijing|Peking,PEK PKX
@@ -35,3 +35,45 @@ TPE,Taipei,,TPE TSA
 BKK,Bangkok,,BKK DMK
 JKT,Giacarta,Jakarta,CGK HLP
 MEL,Melbourne,,MEL AVV
+TRN,Torino,Turin,TRN
+VRN,Verona,,VRN
+TRS,Trieste,,TRS
+AOI,Ancona,,AOI
+BGY,Bergamo,,BGY
+CUF,Cuneo,,CUF
+FLR,Firenze,Florence|Florenz,FLR
+GOA,Genova,Genoa,GOA
+BCN,Barcellona,Barcelona,BCN
+LIS,Lisbona,Lisbon|Lisboa,LIS
+ATH,Atene,Athens,ATH
+PRG,Praga,Prague|Praha,PRG
+BER,Berlino,Berlin,BER
+MUC,Monaco di Baviera,Monaco|Munich|München,MUC
+ZRH,Zurigo,Zurich|Zürich,ZRH
+GVA,Ginevra,Geneva|Genève,GVA
+BSL,Basilea,Basel|Bâle,BSL
+DUB,Dublino,Dublin,DUB
+EDI,Edimburgo,Edinburgh,EDI
+CPH,Copenaghen,Copenhagen|København,CPH
+WAW,Varsavia,Warsaw|Warszawa,WAW WMI
+KRK,Cracovia,Krakow|Kraków,KRK
+BEG,Belgrado,Belgrade,BEG
+SKG,Salonicco,Thessaloniki,SKG
+LUX,Lussemburgo,Luxembourg,LUX
+STR,Stoccarda,Stuttgart,STR
+CGN,Colonia,Cologne|Köln,CGN
+FRA,Francoforte,Frankfurt,FRA
+HAM,Amburgo,Hamburg,HAM
+NCE,Nizza,Nice,NCE
+LYS,Lione,Lyon,LYS
+MRS,Marsiglia,Marseille,MRS
+SVQ,Siviglia,Seville|Sevilla,SVQ
+MLA,Malta,Valletta|La Valletta,MLA
+RAK,Marrakech,Marrakesh,RAK
+TUN,Tunisi,Tunis,TUN
+LED,San Pietroburgo,Saint Petersburg,LED
+DEL,Delhi,New Delhi|Nuova Delhi,DEL
+CAN,Canton,Guangzhou,CAN
+CPT,Città del Capo,Cape Town|Citta del Capo,CPT
+DPS,Bali,Denpasar,DPS
+KUL,Kuala Lumpur,,KUL

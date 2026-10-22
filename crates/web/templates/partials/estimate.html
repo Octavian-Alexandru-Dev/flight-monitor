@@ -1,0 +1,11 @@
+{% if ok %}
+<div class="estimate-figure"><span class="figure-sm">{{ live }}</span><span>query live per ciclo</span></div>
+<dl class="estimate-facts">
+  <div><dt>Combinazioni</dt><dd>{{ candidates }}</dd></div>
+  <div><dt>Query al giorno</dt><dd>~{{ per_day }}</dd></div>
+  {% if scan > 0 %}<div><dt>Scan in cache</dt><dd>{{ scan }}</dd></div>{% endif %}
+</dl>
+<p class="help">{{ strategy }}</p>
+{% else %}
+<p class="help">{{ message }}</p>
+{% endif %}
