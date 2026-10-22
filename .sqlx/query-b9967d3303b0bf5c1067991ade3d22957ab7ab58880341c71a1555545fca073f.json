@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT itinerary FROM price_observations WHERE query_run_id = ? ORDER BY id",
+  "describe": {
+    "columns": [
+      {
+        "name": "itinerary",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "price_observations",
+            "name": "itinerary"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b9967d3303b0bf5c1067991ade3d22957ab7ab58880341c71a1555545fca073f"
+}

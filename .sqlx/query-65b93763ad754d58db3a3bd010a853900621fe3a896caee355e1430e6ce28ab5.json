@@ -1,0 +1,47 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT query_key AS \"query_key!\",\n                      MAX(started_at) AS \"last_run_at?: DateTime<Utc>\",\n                      COUNT(*) AS \"runs!: i64\",\n                      SUM(result_count > 0) AS \"with_results!: i64\"\n               FROM query_runs WHERE outcome = 'ok' GROUP BY query_key",
+  "describe": {
+    "columns": [
+      {
+        "name": "query_key!",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "query_key"
+          }
+        }
+      },
+      {
+        "name": "last_run_at?: DateTime<Utc>",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "name": "runs!: i64",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": "Expression"
+      },
+      {
+        "name": "with_results!: i64",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "65b93763ad754d58db3a3bd010a853900621fe3a896caee355e1430e6ce28ab5"
+}

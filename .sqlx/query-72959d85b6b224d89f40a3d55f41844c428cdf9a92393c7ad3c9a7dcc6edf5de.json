@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO saved_searches (name, definition, active, created_at, updated_at)\n             VALUES (?, ?, 1, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "72959d85b6b224d89f40a3d55f41844c428cdf9a92393c7ad3c9a7dcc6edf5de"
+}

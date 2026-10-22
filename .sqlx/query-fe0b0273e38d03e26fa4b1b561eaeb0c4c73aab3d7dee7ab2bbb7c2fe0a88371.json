@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT provider FROM provider_health ORDER BY provider",
+  "describe": {
+    "columns": [
+      {
+        "name": "provider",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "provider"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fe0b0273e38d03e26fa4b1b561eaeb0c4c73aab3d7dee7ab2bbb7c2fe0a88371"
+}

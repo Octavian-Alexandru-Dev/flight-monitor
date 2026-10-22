@@ -1,0 +1,146 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id AS \"id!\", search_id, started_at AS \"started_at: DateTime<Utc>\",\n                      finished_at AS \"finished_at: DateTime<Utc>\", queries_planned,\n                      queries_executed, queries_failed, best_price_cents, currency, options, calendar\n               FROM search_runs WHERE search_id = ? ORDER BY started_at DESC, id DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "search_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "search_id"
+          }
+        }
+      },
+      {
+        "name": "started_at: DateTime<Utc>",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "started_at"
+          }
+        }
+      },
+      {
+        "name": "finished_at: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "finished_at"
+          }
+        }
+      },
+      {
+        "name": "queries_planned",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "queries_planned"
+          }
+        }
+      },
+      {
+        "name": "queries_executed",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "queries_executed"
+          }
+        }
+      },
+      {
+        "name": "queries_failed",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "queries_failed"
+          }
+        }
+      },
+      {
+        "name": "best_price_cents",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "best_price_cents"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "options",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "options"
+          }
+        }
+      },
+      {
+        "name": "calendar",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "calendar"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "17ecb2ab96a68af351d39a264e3da332056e752d06720ff7db8fd9c459b4a9d3"
+}

@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT provider, status, consecutive_failures, last_error,\n                      last_success_at AS \"last_success_at: DateTime<Utc>\",\n                      last_failure_at AS \"last_failure_at: DateTime<Utc>\",\n                      updated_at AS \"updated_at: DateTime<Utc>\"\n               FROM provider_health WHERE provider = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "provider",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "provider"
+          }
+        }
+      },
+      {
+        "name": "status",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "name": "consecutive_failures",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "consecutive_failures"
+          }
+        }
+      },
+      {
+        "name": "last_error",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "last_error"
+          }
+        }
+      },
+      {
+        "name": "last_success_at: DateTime<Utc>",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "last_success_at"
+          }
+        }
+      },
+      {
+        "name": "last_failure_at: DateTime<Utc>",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "last_failure_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: DateTime<Utc>",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "provider_health",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "03fbf5d96bcd37236f04e1408abee7f4417080b7db08c91bd0771447b041bb64"
+}

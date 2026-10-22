@@ -1,0 +1,33 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT q.query_key AS \"query_key!\", MIN(p.price_cents) AS \"best!: i64\"\n               FROM price_observations p JOIN query_runs q ON q.id = p.query_run_id\n               GROUP BY q.query_key",
+  "describe": {
+    "columns": [
+      {
+        "name": "query_key!",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "query_key"
+          }
+        }
+      },
+      {
+        "name": "best!: i64",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "556eedeb27a1ac04e606d7cde00cb7bd650e07dc3210990b716cdd8657bfcf60"
+}

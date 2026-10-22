@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO search_runs\n                (search_id, started_at, finished_at, queries_planned, queries_executed,\n                 queries_failed, best_price_cents, currency, options, calendar)\n             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": []
+  },
+  "hash": "24255d4b2508e37d5feb8e1c9271520ad7ac6694046e7928df1da228c495931e"
+}

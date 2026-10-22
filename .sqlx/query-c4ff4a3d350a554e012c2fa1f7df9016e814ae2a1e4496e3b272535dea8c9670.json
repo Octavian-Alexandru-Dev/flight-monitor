@@ -1,0 +1,110 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id AS \"id!\", provider, description,\n                      started_at AS \"started_at: DateTime<Utc>\",\n                      duration_ms, outcome, error, result_count\n               FROM query_runs ORDER BY started_at DESC LIMIT ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "provider",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "provider"
+          }
+        }
+      },
+      {
+        "name": "description",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "name": "started_at: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "started_at"
+          }
+        }
+      },
+      {
+        "name": "duration_ms",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "duration_ms"
+          }
+        }
+      },
+      {
+        "name": "outcome",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "outcome"
+          }
+        }
+      },
+      {
+        "name": "error",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "error"
+          }
+        }
+      },
+      {
+        "name": "result_count",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "query_runs",
+            "name": "result_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "c4ff4a3d350a554e012c2fa1f7df9016e814ae2a1e4496e3b272535dea8c9670"
+}

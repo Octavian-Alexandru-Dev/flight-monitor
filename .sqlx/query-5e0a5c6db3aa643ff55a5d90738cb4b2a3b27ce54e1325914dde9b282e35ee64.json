@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO price_observations\n                    (query_run_id, itinerary_key, origin, destination, departure_date, return_date,\n                     price_cents, currency, provider, observed_at, itinerary)\n                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 11
+    },
+    "nullable": []
+  },
+  "hash": "5e0a5c6db3aa643ff55a5d90738cb4b2a3b27ce54e1325914dde9b282e35ee64"
+}

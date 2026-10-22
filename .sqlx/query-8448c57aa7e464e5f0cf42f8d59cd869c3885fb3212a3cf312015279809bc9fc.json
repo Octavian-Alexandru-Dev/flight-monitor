@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO provider_health\n                (provider, status, consecutive_failures, last_error, last_success_at,\n                 last_failure_at, updated_at)\n             VALUES (?, ?, ?, ?, ?, ?, ?)\n             ON CONFLICT (provider) DO UPDATE SET\n                status = excluded.status,\n                consecutive_failures = excluded.consecutive_failures,\n                last_error = excluded.last_error,\n                last_success_at = excluded.last_success_at,\n                last_failure_at = excluded.last_failure_at,\n                updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "8448c57aa7e464e5f0cf42f8d59cd869c3885fb3212a3cf312015279809bc9fc"
+}

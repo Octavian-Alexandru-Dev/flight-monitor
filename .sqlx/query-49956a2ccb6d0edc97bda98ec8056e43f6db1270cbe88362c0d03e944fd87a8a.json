@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT best_price_cents AS \"best!: i64\" FROM search_runs\n               WHERE search_id = ? AND id < ? AND best_price_cents IS NOT NULL\n               ORDER BY id DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "best!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "search_runs",
+            "name": "best_price_cents"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "49956a2ccb6d0edc97bda98ec8056e43f6db1270cbe88362c0d03e944fd87a8a"
+}

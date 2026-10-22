@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO alerts_sent (search_id, option_key, price_cents, reasons, message, sent_at)\n             VALUES (?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "4afb7ca03a1416984fa90772b0e9082ee77694926d9226d165cde6e996cb5d57"
+}

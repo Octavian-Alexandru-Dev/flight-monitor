@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT search_id, price_cents, reasons, sent_at AS \"sent_at: DateTime<Utc>\"\n               FROM alerts_sent ORDER BY sent_at DESC LIMIT ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "search_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "alerts_sent",
+            "name": "search_id"
+          }
+        }
+      },
+      {
+        "name": "price_cents",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "alerts_sent",
+            "name": "price_cents"
+          }
+        }
+      },
+      {
+        "name": "reasons",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "alerts_sent",
+            "name": "reasons"
+          }
+        }
+      },
+      {
+        "name": "sent_at: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "alerts_sent",
+            "name": "sent_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "8ba0e9cdcce2f785d8e0121abab258bc332509934e910b951e0427a93c26bdee"
+}

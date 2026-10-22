@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE saved_searches SET last_run_at = ?, next_run_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "327c250c29857e0f88fb6523d9fba26b4ab2c16417ba6c5ffad39675d61ea055"
+}

@@ -1,0 +1,17 @@
+[package]
+name = "planner"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+domain.workspace = true
+geo.workspace = true
+chrono.workspace = true
+rust_decimal.workspace = true
+serde.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true
