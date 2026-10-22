@@ -20,6 +20,9 @@ pub struct Config {
     pub data_dir: PathBuf,
     #[arg(long, env = "FM_BIND", default_value = "127.0.0.1:8080", global = true)]
     pub bind: SocketAddr,
+    /// Public base URL of the web UI, for links in notifications.
+    #[arg(long, env = "FM_PUBLIC_URL", global = true)]
+    pub public_url: Option<String>,
     #[arg(
         long,
         env = "FM_PYTHON",
@@ -99,6 +102,10 @@ pub struct Config {
 }
 
 impl Config {
+    pub fn travelpayouts(&self) -> Option<Arc<dyn FlightProvider>> {
+        None
+    }
+
     pub fn google_flights(&self) -> Arc<dyn FlightProvider> {
         let worker = ExternalWorker::new(
             &self.python,

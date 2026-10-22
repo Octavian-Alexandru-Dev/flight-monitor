@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Calabria → Giappone a dicembre",
+    "origin": { "kind": "airports", "value": ["REG", "SUF", "CTA"] },
+    "destination": { "kind": "city", "value": "Tokyo" },
+    "mode": "round_trip_decoupled",
+    "outbound": { "kind": "window", "from": "2026-12-08", "to": "2026-12-10" },
+    "stay": { "min_nights": 12, "max_nights": 14 },
+    "constraints": { "max_stops": 2, "min_layover_minutes": 60, "max_layover_minutes": 600 },
+    "passengers": 1,
+    "currency": "EUR",
+    "policy": { "poll_interval_minutes": 360, "query_budget": 12, "adaptive": true },
+    "alerts": [
+      { "kind": "below_price", "value": "650" },
+      { "kind": "drop_percent", "value": "10" },
+      { "kind": "new_historic_minimum" }
+    ]
+  },
+  {
+    "name": "Roma → Barcellona weekend",
+    "origin": { "kind": "city", "value": "Roma" },
+    "destination": { "kind": "airport", "value": "BCN" },
+    "mode": "round_trip_coupled",
+    "outbound": { "kind": "fixed", "date": "2026-12-04" },
+    "stay": { "min_nights": 2, "max_nights": 3 },
+    "constraints": { "max_stops": 0 },
+    "passengers": 2,
+    "currency": "EUR",
+    "policy": { "poll_interval_minutes": 720, "query_budget": 4, "adaptive": true },
+    "alerts": [{ "kind": "new_historic_minimum" }, { "kind": "price_anomaly" }]
+  }
+]
