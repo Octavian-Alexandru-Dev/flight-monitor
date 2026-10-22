@@ -179,7 +179,7 @@ async fn run_once(config: &Config, all: bool, search: Option<i64>) -> anyhow::Re
         };
         let best = run
             .best_price
-            .map_or_else(|| "n/d".to_string(), |p| format::price(p, &run.currency));
+            .map_or_else(|| "n/d".to_string(), |p| format::money(p, &run.currency));
         println!(
             "#{} {}: {best} ({} opzioni)",
             record.search.id.0,

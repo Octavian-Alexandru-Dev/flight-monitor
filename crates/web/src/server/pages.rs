@@ -15,8 +15,8 @@ use storage::{HealthStatus, RunPoint};
 use super::charts::{heatmap, history_chart, sparkline};
 use super::form::{FormErrors, SearchForm, parse_location};
 use super::views::{
-    AdviceView, Delta, OptionView, alerts_summary, dates, delta, local_time, mode_label, money,
-    option_view, relative, route, settings_summary,
+    AdviceView, Delta, OptionView, alerts_summary, dates, delta, local_time, money, option_view,
+    relative, route, settings_summary,
 };
 use super::{AppError, AppResult, AppState, render};
 
@@ -116,7 +116,7 @@ pub async fn dashboard(State(state): State<AppState>) -> AppResult<Html<String>>
             id: search.id.0,
             name: def.name.clone(),
             route: route(def, geo),
-            mode: mode_label(def.mode),
+            mode: def.mode.label(),
             dates: dates(def),
             active: search.active,
             running,
@@ -275,7 +275,7 @@ pub async fn detail(State(state): State<AppState>, Path(id): Path<i64>) -> AppRe
         id: id.0,
         name: def.name.clone(),
         route: route(def, &state.engine.geo),
-        mode: mode_label(def.mode),
+        mode: def.mode.label(),
         dates: dates(def),
         active: record.search.active,
         running,

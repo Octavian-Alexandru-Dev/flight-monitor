@@ -1,31 +1,14 @@
 use chrono::{DateTime, Datelike, Local, NaiveDate, NaiveDateTime, Utc};
-use domain::{Decimal, Direction, Itinerary, LocationSet, SearchDefinition, TripMode, TripOption};
+use domain::{Decimal, Direction, Itinerary, LocationSet, SearchDefinition, TripOption};
 use geo::GeoIndex;
 use planner::{Advice, Verdict};
+
+pub use crate::format::{duration, money, stops};
 
 const MONTHS: [&str; 12] = [
     "gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic",
 ];
 const WEEKDAYS: [&str; 7] = ["lun", "mar", "mer", "gio", "ven", "sab", "dom"];
-
-pub fn money(amount: Decimal, currency: &str) -> String {
-    let rounded = amount.round_dp(0).normalize();
-    let digits = rounded.abs().to_string();
-    let mut grouped = String::new();
-    for (i, c) in digits.chars().enumerate() {
-        if i > 0 && (digits.len() - i).is_multiple_of(3) {
-            grouped.push('.');
-        }
-        grouped.push(c);
-    }
-    let sign = if rounded.is_sign_negative() { "-" } else { "" };
-    match currency {
-        "EUR" => format!("{sign}€{grouped}"),
-        "USD" => format!("{sign}${grouped}"),
-        "GBP" => format!("{sign}£{grouped}"),
-        _ => format!("{sign}{grouped} {currency}"),
-    }
-}
 
 pub fn day_short(date: NaiveDate) -> String {
     format!(
@@ -47,14 +30,6 @@ pub fn day_long(date: NaiveDate) -> String {
 
 fn time_of(at: NaiveDateTime) -> String {
     at.format("%H:%M").to_string()
-}
-
-pub fn duration(minutes: i64) -> String {
-    match (minutes / 60, minutes % 60) {
-        (0, m) => format!("{m} min"),
-        (h, 0) => format!("{h} h"),
-        (h, m) => format!("{h} h {m:02}"),
-    }
 }
 
 /// "tra 3 h", "12 min fa", "ieri"...
@@ -142,10 +117,6 @@ pub fn dates(def: &SearchDefinition) -> String {
         }
         _ => out,
     }
-}
-
-pub fn mode_label(mode: TripMode) -> &'static str {
-    mode.label()
 }
 
 #[derive(Clone, Debug)]
@@ -241,14 +212,6 @@ pub struct OptionView {
     pub multiple_tickets: bool,
 }
 
-fn stops_label(count: usize) -> String {
-    match count {
-        0 => "Diretto".into(),
-        1 => "1 scalo".into(),
-        n => format!("{n} scali"),
-    }
-}
-
 fn ticket(it: &Itinerary, direction: Direction) -> TicketView {
     let mut flights: Vec<String> = it.segments().iter().map(|s| s.code()).collect();
     flights.dedup();
@@ -292,7 +255,7 @@ fn ticket(it: &Itinerary, direction: Direction) -> TicketView {
         arrive: time_of(it.arrival()),
         plus_days: (it.arrival().date() - it.departure_date()).num_days(),
         duration: duration(it.total_minutes()),
-        stops: stops_label(it.stops()),
+        stops: stops(it.stops()),
         layovers: layovers.join(", "),
         flights: flights.join(" · "),
         airlines: airlines.join(", "),
@@ -354,7 +317,7 @@ pub fn settings_summary(def: &SearchDefinition, geo: &GeoIndex) -> Vec<String> {
     let c = &def.constraints;
     let mut out = vec![format!(
         "Max {} · {} passegger{}",
-        stops_label(usize::from(c.max_stops))
+        stops(usize::from(c.max_stops))
             .to_lowercase()
             .replace("diretto", "0 scali"),
         def.passengers,
@@ -418,13 +381,6 @@ pub fn alerts_summary(def: &SearchDefinition) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn formats_money_with_grouping() {
-        assert_eq!(money(Decimal::from(1364), "EUR"), "€1.364");
-        assert_eq!(money(Decimal::new(4999, 2), "EUR"), "€50");
-        assert_eq!(money(Decimal::from(123456), "JPY"), "123.456 JPY");
-    }
 
     #[test]
     fn formats_relative_times() {

@@ -2,6 +2,7 @@ mod error;
 mod iata;
 mod itinerary;
 mod location;
+mod money;
 mod option;
 mod query;
 mod search;
@@ -10,6 +11,7 @@ pub use error::DomainError;
 pub use iata::Iata;
 pub use itinerary::{Itinerary, Layover, Segment};
 pub use location::LocationSet;
+pub use money::format_money;
 pub use option::{CalendarCell, Direction, Ticket, TripOption, Warning};
 pub use query::{Capabilities, ProviderId, ProviderQuery, QueryLeg, QueryStats};
 pub use search::{

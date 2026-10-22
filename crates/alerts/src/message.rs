@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use domain::{Decimal, TripOption};
+use domain::{Decimal, TripOption, format_money as money};
 
 use crate::Trigger;
 
@@ -7,16 +7,6 @@ pub fn escape(text: &str) -> String {
     text.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
-}
-
-fn money(amount: Decimal, currency: &str) -> String {
-    let amount = amount.round_dp(2).normalize();
-    match currency {
-        "EUR" => format!("€{amount}"),
-        "USD" => format!("${amount}"),
-        "GBP" => format!("£{amount}"),
-        _ => format!("{amount} {currency}"),
-    }
 }
 
 fn day(date: NaiveDate) -> String {
