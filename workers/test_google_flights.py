@@ -1,6 +1,7 @@
 """Offline tests for the Google Flights worker: python -m unittest workers/test_google_flights.py"""
 
 import base64
+import json
 import unittest
 
 import google_flights as worker
@@ -55,6 +56,19 @@ class ExtractPayload(unittest.TestCase):
         with self.assertRaises(worker.WorkerError) as ctx:
             worker.extract_payload(self.page("<div>nothing here</div>"))
         self.assertEqual(ctx.exception.kind, "parse")
+
+
+class RpcPayloads(unittest.TestCase):
+    def test_decodes_streamed_answer(self):
+        inner = [None, None, [[["XX"]]], [[["YY"], ["ZZ"]]]]
+        line = '[["wrb.fr",null,' + json.dumps(json.dumps(inner)) + "]]"
+        body = ")]}'\n\n123\n" + line + '\n56\n[["di",47]]\n'
+        payloads = worker.rpc_payloads(body)
+        self.assertEqual(payloads, [inner])
+        self.assertEqual(worker.flight_count(payloads[0]), 3)
+
+    def test_ignores_error_envelopes(self):
+        self.assertEqual(worker.rpc_payloads('[["wrb.fr",null,null,null,null,[13]]]'), [])
 
 
 if __name__ == "__main__":
