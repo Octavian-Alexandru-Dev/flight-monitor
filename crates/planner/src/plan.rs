@@ -75,6 +75,7 @@ impl Planner<'_> {
         let mut queries: Vec<ProviderQuery> = needs(def, &resolved, &destinations)
             .iter()
             .flat_map(as_one_way)
+            .filter(|(_, from, ..)| !from.is_empty())
             .flat_map(|(_, from, to, dates, passengers)| {
                 expand(def, scan, &from, &to, &dates, passengers)
             })
@@ -361,12 +362,18 @@ fn leg_score(leg: &QueryLeg, quotes: &[Itinerary]) -> Option<Decimal> {
         .min()
 }
 
+/// Estimated price of a candidate. A return leg without quotes (e.g. from a destination
+/// discovered by the scan) is assumed to cost as much as the outbound.
 fn score(query: &ProviderQuery, quotes: &[Itinerary]) -> Option<Decimal> {
-    query
-        .legs
-        .iter()
-        .map(|leg| leg_score(leg, quotes))
-        .sum::<Option<Decimal>>()
+    let (first, rest) = query.legs.split_first()?;
+    let outbound = leg_score(first, quotes)?;
+    Some(
+        outbound
+            + rest
+                .iter()
+                .map(|leg| leg_score(leg, quotes).unwrap_or(outbound))
+                .sum::<Decimal>(),
+    )
 }
 
 fn cheapest_destinations(quotes: &[Itinerary], limit: usize) -> Vec<Iata> {

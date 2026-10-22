@@ -335,7 +335,9 @@ pub fn build_options(
         TripMode::RoundTripDecoupled => {
             let outs = sets.outbound(&resolved.origins);
             let backs = sets.returns(&resolved.return_destinations);
-            calendar_for_pairs(def, &outs, &backs, &mut note);
+            if resolved.companions.is_empty() {
+                calendar_for_pairs(def, &outs, &backs, &mut note);
+            }
             pair(def, outs, backs)
                 .into_iter()
                 .map(|(o, b)| {

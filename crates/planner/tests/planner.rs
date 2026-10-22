@@ -351,3 +351,37 @@ fn estimate_reports_resolved_airports() {
     assert_eq!(estimate.candidates, 2);
     assert_eq!(estimate.live_per_cycle, 2);
 }
+
+#[test]
+fn open_destination_round_trip_scans_outbound_and_verifies_fares() {
+    let mut def = search(
+        airport("FCO"),
+        LocationSet::Anywhere,
+        TripMode::RoundTripCoupled,
+    );
+    def.stay = Some(StayLength {
+        min_nights: 3,
+        max_nights: 3,
+    });
+    let (geo, live_caps, scan_caps) = (geo(), live_caps(), scan_caps());
+    let p = Planner {
+        geo: &geo,
+        live: &live_caps,
+        scan: Some(&scan_caps),
+        verify_top_n: 4,
+    };
+    let scans = p.scan_queries(&def).unwrap();
+    assert!(scans.iter().all(|q| !q.legs[0].from.is_empty()));
+    assert_eq!(scans.len(), 1);
+
+    let quotes = [
+        quote("FCO", "BCN", "2026-12-10", 30),
+        quote("FCO", "ATH", "2026-12-10", 45),
+    ];
+    let plan = p.live_queries(&def, &quotes, &HashMap::new()).unwrap();
+    assert_eq!(plan.queries.len(), 1);
+    let q = &plan.queries[0];
+    assert!(q.is_round_trip());
+    assert_eq!(q.legs[0].to, [iata("ATH"), iata("BCN")]);
+    assert_eq!(q.legs[1].date_from, date("2026-12-13"));
+}

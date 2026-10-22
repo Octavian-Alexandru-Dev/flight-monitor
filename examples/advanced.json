@@ -1,0 +1,45 @@
+[
+  {
+    "name": "Reggio → Tokyo con cambio a Milano",
+    "origin": { "kind": "airport", "value": "REG" },
+    "destination": { "kind": "city", "value": "Tokyo" },
+    "mode": "one_way",
+    "outbound": { "kind": "fixed", "date": "2026-12-10" },
+    "constraints": { "max_stops": 1 },
+    "passengers": 1,
+    "currency": "EUR",
+    "policy": { "poll_interval_minutes": 720, "query_budget": 10, "adaptive": true },
+    "alerts": [{ "kind": "new_historic_minimum" }],
+    "via": { "hubs": { "kind": "city", "value": "Milano" }, "min_connection_minutes": 180, "max_connection_minutes": 1440 }
+  },
+  {
+    "name": "Barcellona in gruppo",
+    "origin": { "kind": "city", "value": "Roma" },
+    "destination": { "kind": "airport", "value": "BCN" },
+    "mode": "round_trip_decoupled",
+    "outbound": { "kind": "fixed", "date": "2026-12-04" },
+    "stay": { "min_nights": 2, "max_nights": 3 },
+    "constraints": { "max_stops": 0 },
+    "passengers": 1,
+    "currency": "EUR",
+    "policy": { "poll_interval_minutes": 720, "query_budget": 12, "adaptive": true },
+    "alerts": [{ "kind": "new_historic_minimum" }],
+    "companions": [{ "name": "Giulia", "origin": { "kind": "city", "value": "Milano" } }],
+    "group_goal": { "kind": "align_arrivals", "max_spread_minutes": 180 },
+    "costs": { "airport_access": { "FCO": "14", "CIA": "6" }, "overnight_layover": "70" }
+  },
+  {
+    "name": "Giappone open-jaw: Tokyo in, Osaka out",
+    "origin": { "kind": "airport", "value": "FCO" },
+    "destination": { "kind": "city", "value": "Tokyo" },
+    "return_origin": { "kind": "city", "value": "Osaka" },
+    "mode": "round_trip_decoupled",
+    "outbound": { "kind": "fixed", "date": "2026-12-08" },
+    "stay": { "min_nights": 12, "max_nights": 13 },
+    "constraints": { "max_stops": 1 },
+    "passengers": 1,
+    "currency": "EUR",
+    "policy": { "poll_interval_minutes": 720, "query_budget": 6, "adaptive": true },
+    "alerts": [{ "kind": "new_historic_minimum" }]
+  }
+]

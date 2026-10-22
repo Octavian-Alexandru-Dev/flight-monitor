@@ -1,0 +1,17 @@
+# systemd unit for a home server (Raspberry Pi, mini PC).
+# Install: sudo cp deploy/flight-monitor.service /etc/systemd/system/ && sudo systemctl enable --now flight-monitor
+[Unit]
+Description=Flight Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/flight-monitor
+EnvironmentFile=/home/pi/flight-monitor/.env
+ExecStart=/home/pi/flight-monitor/target/release/flight-monitor serve
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

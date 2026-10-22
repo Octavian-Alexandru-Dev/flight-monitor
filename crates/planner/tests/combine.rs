@@ -361,3 +361,42 @@ fn decoupled_calendar_covers_all_date_pairs() {
     let cheapest = outcome.calendar.iter().map(|c| c.price).min().unwrap();
     assert_eq!(cheapest, Decimal::from(770));
 }
+
+#[test]
+fn group_calendar_shows_group_totals() {
+    let mut def = search(airport("FCO"), airport("BCN"), TripMode::RoundTripDecoupled);
+    def.stay = Some(StayLength {
+        min_nights: 2,
+        max_nights: 2,
+    });
+    def.companions = vec![Companion {
+        name: "Giulia".into(),
+        origin: LocationSet::City("Milano".into()),
+    }];
+    let itineraries = [
+        trip(
+            &[("FCO", "BCN", "2026-12-10T10:00", "2026-12-10T12:00")],
+            40,
+            "VY",
+        ),
+        trip(
+            &[("BCN", "FCO", "2026-12-12T10:00", "2026-12-12T12:00")],
+            30,
+            "VY",
+        ),
+        trip(
+            &[("MXP", "BCN", "2026-12-10T11:00", "2026-12-10T12:30")],
+            50,
+            "FR",
+        ),
+        trip(
+            &[("BCN", "MXP", "2026-12-12T15:00", "2026-12-12T16:30")],
+            20,
+            "FR",
+        ),
+    ];
+    let outcome = options(&def, &itineraries);
+    assert_eq!(outcome.options[0].total_price, Decimal::from(140));
+    assert_eq!(outcome.calendar.len(), 1);
+    assert_eq!(outcome.calendar[0].price, Decimal::from(140));
+}
