@@ -1471,8 +1471,7 @@ dependencies = [
  "domain",
  "geo",
  "rust_decimal",
- "serde",
- "tracing",
+ "thiserror",
 ]
 
 [[package]]

@@ -300,6 +300,13 @@ impl SearchDefinition {
             }
             _ => {}
         }
+        if matches!(self.destination, LocationSet::Anywhere)
+            && (self.mode == TripMode::RoundTripDecoupled
+                || self.via.is_some()
+                || !self.companions.is_empty())
+        {
+            return fail("'Ovunque' funziona con solo andata o A/R abbinato, senza hub né gruppo");
+        }
         if self.is_open_jaw() && self.mode != TripMode::RoundTripDecoupled {
             return fail("l'open-jaw richiede la modalità A/R libero");
         }

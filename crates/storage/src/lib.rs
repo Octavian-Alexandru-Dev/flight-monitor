@@ -15,7 +15,7 @@ use thiserror::Error;
 pub use alerts::{AlertRecord, NewAlert};
 pub use health::{HealthStatus, ProviderHealth};
 pub use money::{from_cents, to_cents};
-pub use query_runs::{NewQueryRun, QueryHistory, QueryRunRecord, RouteStats};
+pub use query_runs::{NewQueryRun, QueryRunRecord, RouteStats};
 pub use search_runs::{NewSearchRun, RunPoint, SearchRun};
 pub use searches::SearchRecord;
 

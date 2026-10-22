@@ -10,8 +10,7 @@ domain.workspace = true
 geo.workspace = true
 chrono.workspace = true
 rust_decimal.workspace = true
-serde.workspace = true
-tracing.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true

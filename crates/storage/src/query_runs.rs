@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
-use domain::{Decimal, Iata, Itinerary, ProviderId};
+use domain::{Decimal, Iata, Itinerary, ProviderId, QueryStats};
 
 use crate::{Db, Result, from_cents, to_cents};
 
@@ -26,15 +26,6 @@ pub struct QueryRunRecord {
     pub outcome: String,
     pub error: Option<String>,
     pub result_count: i64,
-}
-
-/// What past runs say about a query, used to prioritise within a budget.
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct QueryHistory {
-    pub last_run_at: Option<DateTime<Utc>>,
-    pub runs: i64,
-    pub runs_with_results: i64,
-    pub best_price: Option<Decimal>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -129,8 +120,8 @@ impl Db {
         Ok(Some(itineraries))
     }
 
-    pub async fn query_history(&self) -> Result<HashMap<String, QueryHistory>> {
-        let mut history: HashMap<String, QueryHistory> = HashMap::new();
+    pub async fn query_history(&self) -> Result<HashMap<String, QueryStats>> {
+        let mut history: HashMap<String, QueryStats> = HashMap::new();
         let runs = sqlx::query!(
             r#"SELECT query_key AS "query_key!",
                       MAX(started_at) AS "last_run_at?: DateTime<Utc>",
@@ -143,7 +134,7 @@ impl Db {
         for row in runs {
             history.insert(
                 row.query_key,
-                QueryHistory {
+                QueryStats {
                     last_run_at: row.last_run_at,
                     runs: row.runs,
                     runs_with_results: row.with_results,

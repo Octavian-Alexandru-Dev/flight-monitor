@@ -1,7 +1,8 @@
 use std::fmt;
 use std::time::Duration;
 
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, Utc};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use crate::Iata;
@@ -124,4 +125,13 @@ pub struct Capabilities {
     /// `false` means cached data, good for scanning only.
     pub live: bool,
     pub min_interval: Duration,
+}
+
+/// What past runs say about a query, used to prioritise within a budget.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct QueryStats {
+    pub last_run_at: Option<DateTime<Utc>>,
+    pub runs: i64,
+    pub runs_with_results: i64,
+    pub best_price: Option<Decimal>,
 }
