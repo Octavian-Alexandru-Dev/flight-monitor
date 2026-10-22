@@ -36,7 +36,7 @@ pub async fn engine(config: &Config) -> anyhow::Result<Arc<Engine>> {
         db,
         Arc::new(geo),
         config.google_flights(),
-        config.travelpayouts(),
+        config.travelpayouts()?,
         notifier,
         EngineSettings {
             cache_ttl: chrono::Duration::minutes(config.cache_ttl_minutes),

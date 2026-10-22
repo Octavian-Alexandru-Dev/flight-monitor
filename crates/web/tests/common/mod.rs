@@ -175,3 +175,78 @@ pub async fn saved(engine: &Engine, def: SearchDefinition) -> SavedSearch {
     let id = engine.db.create_search(&def).await.unwrap();
     engine.db.get_search(id).await.unwrap().search
 }
+
+/// A cached-price source with one FCO→NRT quote per December day, cheaper on the 15th.
+pub struct ScanProvider {
+    quotes: Vec<Itinerary>,
+    calls: AtomicUsize,
+    capabilities: Capabilities,
+}
+
+impl ScanProvider {
+    pub fn new() -> Self {
+        let quotes = (1..=30)
+            .map(|day| {
+                let departure = format!("2026-12-{day:02}T10:00:00").parse().unwrap();
+                Itinerary::new(
+                    vec![domain::Segment {
+                        from: iata("FCO"),
+                        to: iata("NRT"),
+                        departure,
+                        arrival: departure + chrono::Duration::hours(16),
+                        duration_minutes: 960,
+                        airline: "XX".into(),
+                        airline_name: "Cache".into(),
+                        flight_number: "1".into(),
+                    }],
+                    Decimal::from(if day == 15 { 380 } else { 400 + day }),
+                    "EUR".into(),
+                    ProviderId::new("scan"),
+                    Utc::now(),
+                )
+                .unwrap()
+            })
+            .collect();
+        Self {
+            quotes,
+            calls: AtomicUsize::new(0),
+            capabilities: Capabilities {
+                multi_airport_query: false,
+                max_airports_per_side: 1,
+                city_query: true,
+                max_stops_filter: false,
+                round_trip: false,
+                date_range: true,
+                open_destination: true,
+                live: false,
+                min_interval: Duration::ZERO,
+            },
+        }
+    }
+
+    pub fn calls(&self) -> usize {
+        self.calls.load(Ordering::SeqCst)
+    }
+}
+
+#[async_trait]
+impl FlightProvider for ScanProvider {
+    fn id(&self) -> ProviderId {
+        ProviderId::new("scan")
+    }
+
+    fn capabilities(&self) -> &Capabilities {
+        &self.capabilities
+    }
+
+    async fn search(&self, query: &ProviderQuery) -> Result<Vec<Itinerary>, ProviderError> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        let leg = &query.legs[0];
+        Ok(self
+            .quotes
+            .iter()
+            .filter(|q| leg.covers(q.origin(), q.destination(), q.departure_date()))
+            .cloned()
+            .collect())
+    }
+}

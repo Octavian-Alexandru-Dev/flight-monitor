@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "data": [
+    {"origin": "ROM", "destination": "BCN", "origin_airport": "FCO", "destination_airport": "BCN", "price": 30, "airline": "VY", "flight_number": "6021", "departure_at": "2026-12-05T23:15:00+01:00", "return_at": "", "transfers": 0, "return_transfers": 0, "duration": 110, "duration_to": 110, "duration_back": 0, "link": "/search/ROM0512BCN1?t=VY_x&expected_price=30"},
+    {"origin": "ROM", "destination": "ATH", "origin_airport": "CIA", "destination_airport": "ATH", "price": 41, "airline": "FR", "flight_number": "6334", "departure_at": "2026-12-03T06:40:00+01:00", "return_at": "", "transfers": 0, "return_transfers": 0, "duration": 125, "duration_to": 125, "duration_back": 0, "link": "/search/ROM0312ATH1?t=FR_x&expected_price=41"},
+    {"origin": "ROM", "destination": "NYC", "origin_airport": "FCO", "destination_airport": "JFK", "price": 289, "airline": "AZ", "flight_number": "610", "departure_at": "2026-12-11T10:05:00+01:00", "return_at": "", "transfers": 0, "return_transfers": 0, "duration": 570, "duration_to": 570, "duration_back": 0, "link": "/search/ROM1112NYC1?t=AZ_x&expected_price=289"}
+  ],
+  "currency": "eur"
+}

@@ -157,8 +157,10 @@ impl Db {
         Ok(history)
     }
 
+    /// Price distribution of one-way tickets on a route, as seen by one provider.
     pub async fn route_stats(
         &self,
+        provider: &str,
         origin: &Iata,
         destination: &Iata,
         currency: &str,
@@ -169,10 +171,12 @@ impl Db {
                       AVG(price_cents) AS "mean: f64",
                       AVG(price_cents * price_cents) AS "mean_sq: f64"
                FROM price_observations
-               WHERE origin = ? AND destination = ? AND currency = ? AND return_date IS NULL"#,
+               WHERE origin = ? AND destination = ? AND currency = ? AND provider = ?
+                 AND return_date IS NULL"#,
             origin,
             destination,
-            currency
+            currency,
+            provider
         )
         .fetch_one(&self.pool)
         .await?;

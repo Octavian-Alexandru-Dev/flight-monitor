@@ -187,3 +187,58 @@ async fn silent_empty_answers_degrade_the_source() {
             .any(|m| m.contains("di solito ne ha"))
     );
 }
+
+#[tokio::test]
+async fn country_search_runs_fewer_live_queries_after_a_scan() {
+    let mut def = definition(Vec::new());
+    def.origin = domain::LocationSet::Airport(iata("FCO"));
+    def.destination = domain::LocationSet::Country("JP".into());
+    def.outbound = domain::DateSpec::Window {
+        from: "2026-12-01".parse().unwrap(),
+        to: "2026-12-30".parse().unwrap(),
+    };
+    def.policy.query_budget = 40;
+
+    let (verify_only, live_alone, _) = setup(chrono::Duration::zero()).await;
+    let search = saved(&verify_only, def.clone()).await;
+    let report = verify_only.run_searches(vec![search]).await.unwrap();
+    assert_eq!(
+        live_alone.calls(),
+        40,
+        "verify-only spends the whole budget"
+    );
+    assert_eq!(report.executed, 40);
+
+    let live = Arc::new(FixtureProvider::new());
+    let scan = Arc::new(ScanProvider::new());
+    let with_scan = Engine::new(
+        storage::Db::in_memory().await.unwrap(),
+        verify_only.geo.clone(),
+        live.clone(),
+        Some(scan.clone()),
+        Arc::new(alerts::RecordingNotifier::default()),
+        EngineSettings {
+            cache_ttl: chrono::Duration::zero(),
+            verify_top_n: 8,
+            public_url: None,
+        },
+    );
+    let search = saved(&with_scan, def).await;
+    with_scan.run_searches(vec![search]).await.unwrap();
+    let japan = with_scan
+        .geo
+        .resolve(&domain::LocationSet::Country("JP".into()))
+        .unwrap()
+        .len();
+    assert_eq!(
+        scan.calls(),
+        japan,
+        "one cached query per airport pair for December"
+    );
+    assert_eq!(
+        live.calls(),
+        8,
+        "only the best quoted dates are verified live"
+    );
+    assert!(live.calls() < live_alone.calls());
+}

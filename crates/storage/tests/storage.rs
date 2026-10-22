@@ -124,6 +124,7 @@ async fn query_runs_feed_cache_and_history() {
 
     let stats = db
         .route_stats(
+            "test",
             &Iata::new("FCO").unwrap(),
             &Iata::new("NRT").unwrap(),
             "EUR",

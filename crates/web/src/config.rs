@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use clap::Args;
-use providers::{ExternalWorker, FlightProvider, GoogleFlights};
+use providers::{ExternalWorker, FlightProvider, GoogleFlights, Travelpayouts};
 
 /// Runtime settings, read from flags or environment (`.env` is loaded at startup).
 #[derive(Args, Clone, Debug)]
@@ -102,8 +102,16 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn travelpayouts(&self) -> Option<Arc<dyn FlightProvider>> {
-        None
+    /// The scan provider, when a Travelpayouts token is configured.
+    pub fn travelpayouts(&self) -> anyhow::Result<Option<Arc<dyn FlightProvider>>> {
+        match self
+            .travelpayouts_token
+            .as_deref()
+            .filter(|t| !t.is_empty())
+        {
+            Some(token) => Ok(Some(Arc::new(Travelpayouts::new(token)?))),
+            None => Ok(None),
+        }
     }
 
     pub fn google_flights(&self) -> Arc<dyn FlightProvider> {

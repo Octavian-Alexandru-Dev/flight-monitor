@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT COUNT(*) AS \"n!: i64\",\n                      AVG(price_cents) AS \"mean: f64\",\n                      AVG(price_cents * price_cents) AS \"mean_sq: f64\"\n               FROM price_observations\n               WHERE origin = ? AND destination = ? AND currency = ? AND return_date IS NULL",
+  "query": "SELECT COUNT(*) AS \"n!: i64\",\n                      AVG(price_cents) AS \"mean: f64\",\n                      AVG(price_cents * price_cents) AS \"mean_sq: f64\"\n               FROM price_observations\n               WHERE origin = ? AND destination = ? AND currency = ? AND provider = ?\n                 AND return_date IS NULL",
   "describe": {
     "columns": [
       {
@@ -23,7 +23,7 @@
       }
     ],
     "parameters": {
-      "Right": 3
+      "Right": 4
     },
     "nullable": [
       false,
@@ -31,5 +31,5 @@
       true
     ]
   },
-  "hash": "41528f2ee9dd5c36f487a71772b0ab92b72c11648fb37c02a20de88219d8bbc7"
+  "hash": "45855764b95ba6518392b029907304bf6c7cc0f1894361aae0eb667e1deeba7c"
 }

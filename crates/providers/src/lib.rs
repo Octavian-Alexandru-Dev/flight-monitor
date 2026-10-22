@@ -1,11 +1,11 @@
 mod error;
 mod google_flights;
-
+mod travelpayouts;
 mod worker;
 
 pub use error::ProviderError;
 pub use google_flights::{GoogleFlights, GoogleReply};
-
+pub use travelpayouts::{Travelpayouts, parse_response as parse_travelpayouts};
 pub use worker::ExternalWorker;
 
 use async_trait::async_trait;

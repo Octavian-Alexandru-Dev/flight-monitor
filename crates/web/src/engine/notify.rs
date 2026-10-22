@@ -73,7 +73,12 @@ impl Engine {
             let it = &ticket.itinerary;
             let stats = self
                 .db
-                .route_stats(it.origin(), it.destination(), &it.currency)
+                .route_stats(
+                    it.source.as_str(),
+                    it.origin(),
+                    it.destination(),
+                    &it.currency,
+                )
                 .await?;
             return Ok(Some(Baseline {
                 mean: stats.mean,
