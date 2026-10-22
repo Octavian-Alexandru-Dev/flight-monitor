@@ -1,93 +1,14 @@
 use std::collections::HashSet;
-use std::time::Duration;
 
-use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-use domain::{Capabilities, Decimal, Iata, Itinerary, ProviderId, ProviderQuery, Segment, Url};
-use serde::{Deserialize, Serialize};
+use domain::{Decimal, Iata, Itinerary, ProviderId, ProviderQuery, Segment, Url};
+use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{ExternalWorker, FlightProvider, ProviderError};
+use super::ID;
+use crate::ProviderError;
 
-const ID: &str = "google_flights";
-const MAX_AIRPORTS_PER_SIDE: usize = 7;
-
-/// Live Google Flights results, fetched by the Python worker and parsed here.
-pub struct GoogleFlights {
-    worker: ExternalWorker,
-    capabilities: Capabilities,
-}
-
-impl GoogleFlights {
-    pub fn new(worker: ExternalWorker, min_interval: Duration) -> Self {
-        Self {
-            worker,
-            capabilities: Capabilities {
-                multi_airport_query: true,
-                max_airports_per_side: MAX_AIRPORTS_PER_SIDE,
-                city_query: false,
-                max_stops_filter: true,
-                round_trip: true,
-                date_range: false,
-                open_destination: false,
-                live: true,
-                min_interval,
-            },
-        }
-    }
-}
-
-#[derive(Serialize)]
-struct WorkerRequest<'a> {
-    legs: Vec<WorkerLeg<'a>>,
-    max_stops: u8,
-    adults: u8,
-    currency: &'a str,
-    checked_bags: u8,
-    language: &'static str,
-}
-
-#[derive(Serialize)]
-struct WorkerLeg<'a> {
-    date: NaiveDate,
-    from: Vec<&'a str>,
-    to: Vec<&'a str>,
-}
-
-impl<'a> WorkerRequest<'a> {
-    fn from_query(query: &'a ProviderQuery) -> Result<Self, ProviderError> {
-        let supported = !query.legs.is_empty()
-            && query.legs.len() <= 2
-            && query.legs.iter().all(|leg| {
-                leg.date_from == leg.date_to
-                    && !leg.from.is_empty()
-                    && !leg.to.is_empty()
-                    && leg.from.len() <= MAX_AIRPORTS_PER_SIDE
-                    && leg.to.len() <= MAX_AIRPORTS_PER_SIDE
-            });
-        if !supported {
-            return Err(ProviderError::Unsupported);
-        }
-        Ok(Self {
-            legs: query
-                .legs
-                .iter()
-                .map(|leg| WorkerLeg {
-                    date: leg.date_from,
-                    from: leg.from.iter().map(Iata::as_str).collect(),
-                    to: leg.to.iter().map(Iata::as_str).collect(),
-                })
-                .collect(),
-            max_stops: query.max_stops,
-            adults: query.passengers,
-            currency: &query.currency,
-            checked_bags: query.checked_bags,
-            language: "en",
-        })
-    }
-}
-
-/// What the worker returns: the search URL and the raw `ds:1` payload.
+/// A results page: its URL and the raw payload (`None` when Google found no flights).
 #[derive(Debug, Deserialize)]
 pub struct GoogleReply {
     pub url: String,
@@ -188,36 +109,18 @@ fn local_time(date: &Value, time: &Value) -> Option<NaiveDateTime> {
     Some(date.and_time(time))
 }
 
-#[async_trait]
-impl FlightProvider for GoogleFlights {
-    fn id(&self) -> ProviderId {
-        ProviderId::new(ID)
-    }
-
-    fn capabilities(&self) -> &Capabilities {
-        &self.capabilities
-    }
-
-    async fn search(&self, query: &ProviderQuery) -> Result<Vec<Itinerary>, ProviderError> {
-        let request = WorkerRequest::from_query(query)?;
-        let reply: GoogleReply = self.worker.call(&request).await?;
-        reply.itineraries(query, Utc::now())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use domain::QueryLeg;
 
     use super::*;
-    use crate::worker::decode_reply;
 
     fn fixture(name: &str) -> GoogleReply {
         let path = format!(
             "{}/../../fixtures/google_flights/{name}.json",
             env!("CARGO_MANIFEST_DIR")
         );
-        decode_reply(&std::fs::read(path).unwrap()).unwrap()
+        serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
     }
 
     fn codes(list: &[&str]) -> Vec<Iata> {
@@ -335,15 +238,6 @@ mod tests {
             reply.itineraries(&q, Utc::now()),
             Err(ProviderError::Parse(_))
         ));
-    }
-
-    #[test]
-    fn rejects_queries_it_cannot_express() {
-        let mut leg = QueryLeg::on(codes(&["FCO"]), codes(&["NRT"]), date("2026-12-10"));
-        leg.date_to = date("2026-12-31");
-        assert!(WorkerRequest::from_query(&query(vec![leg])).is_err());
-        let open = QueryLeg::on(codes(&["FCO"]), Vec::new(), date("2026-12-10"));
-        assert!(WorkerRequest::from_query(&query(vec![open])).is_err());
     }
 
     #[test]

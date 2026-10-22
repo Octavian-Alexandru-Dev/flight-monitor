@@ -28,7 +28,7 @@ pub async fn run(config: &Config, args: SearchArgs) -> anyhow::Result<()> {
         currency: args.currency.to_ascii_uppercase(),
         checked_bags: args.bags,
     };
-    let provider = config.google_flights();
+    let provider = config.google_flights()?;
     println!("{} · {}", provider.id(), query.describe());
     let mut itineraries = provider.search(&query).await?;
     itineraries.sort_by_key(|i| i.price);

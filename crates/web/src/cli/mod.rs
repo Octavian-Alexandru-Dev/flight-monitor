@@ -43,6 +43,8 @@ enum Command {
         #[arg(long)]
         send: bool,
     },
+    /// Find Chrome or download Chromium, used for searches Google has not cached.
+    InstallBrowser,
     /// Rebuild the airport, country and airline datasets from OurAirports/OpenFlights.
     ImportGeo {
         /// Use already downloaded raw files instead of fetching them.
@@ -88,6 +90,11 @@ impl Cli {
                 if send {
                     engine.notifier().send(&message).await?;
                 }
+                Ok(())
+            }
+            Command::InstallBrowser => {
+                let path = config.headless_browser().executable().await?;
+                println!("browser: {}", path.display());
                 Ok(())
             }
             Command::ImportGeo { sources } => import_geo::run(&config.data_dir, sources).await,

@@ -19,6 +19,9 @@ alerts = { path = "crates/alerts" }
 anyhow = "1"
 askama = "0.16"
 async-trait = "0.1"
+base64 = "0.22"
+chromiumoxide = { version = "0.9", default-features = false, features = ["fetcher", "rustls", "zip8"] }
+futures = "0.3"
 axum = { version = "0.8", features = ["macros"] }
 chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
 clap = { version = "4", features = ["derive", "env"] }

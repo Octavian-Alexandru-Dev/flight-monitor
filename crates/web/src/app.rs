@@ -35,7 +35,7 @@ pub async fn engine(config: &Config) -> anyhow::Result<Arc<Engine>> {
     Ok(Arc::new(Engine::new(
         db,
         Arc::new(geo),
-        config.google_flights(),
+        config.google_flights()?,
         config.travelpayouts()?,
         notifier,
         EngineSettings {

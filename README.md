@@ -8,13 +8,13 @@ Gira su una macchina di casa (PC, mini PC, Raspberry Pi), senza servizi a pagame
 
 ## Avvio rapido
 
-Requisiti: Rust 1.88 o successivo, Python 3.10 o successivo.
+Requisiti: Rust 1.88 o successivo. Nient'altro: è un unico binario.
 
 ```sh
-./scripts/setup-worker.sh          # virtualenv del worker Google Flights
-cp .env.example .env               # opzionale: Telegram, Travelpayouts, LLM locale
+cp .env.example .env                               # opzionale: Telegram, Travelpayouts, LLM locale
 cargo build --release
-./target/release/flight-monitor    # scheduler + interfaccia su http://127.0.0.1:8080
+./target/release/flight-monitor install-browser    # trova Chrome o scarica Chromium (una volta)
+./target/release/flight-monitor                    # scheduler + interfaccia su http://127.0.0.1:8080
 ```
 
 Le ricerche si creano dall'interfaccia web. Il primo controllo parte appena la ricerca è salvata.
@@ -28,6 +28,7 @@ Le ricerche si creano dall'interfaccia web. Il primo controllo parte appena la r
 | `flight-monitor seed examples/searches.json` | Salva ricerche da JSON e stampa la stima di query per ciclo. |
 | `flight-monitor run-once [--all] [--search ID]` | Esegue subito le ricerche dovute, tutte o una. |
 | `flight-monitor summary [--send]` | Stampa (e invia) il riepilogo giornaliero. |
+| `flight-monitor install-browser` | Trova Chrome o scarica Chromium in `data/chromium`. |
 | `flight-monitor import-geo [--sources DIR]` | Ricostruisce i dataset di aeroporti, paesi e compagnie. |
 
 ## Configurazione
@@ -39,8 +40,8 @@ Tutto tramite variabili d'ambiente o file `.env` (vedi `.env.example`). Ogni var
 | `FM_DATABASE_URL` | `sqlite://data/flight-monitor.db` | SQLite, creato al primo avvio. |
 | `FM_BIND` | `127.0.0.1:8080` | Usa `0.0.0.0:8080` per raggiungerla dalla rete di casa. |
 | `FM_PUBLIC_URL` | | Base dei link "Dettagli" nei messaggi Telegram. |
-| `FM_PYTHON`, `FM_GOOGLE_WORKER` | `workers/.venv/bin/python`, `workers/google_flights.py` | Worker esterno. |
-| `FM_GOOGLE_MIN_INTERVAL_SECS` | `12` | Pausa minima tra due richieste a Google Flights. |
+| `FM_CHROME` | | Chrome o Chromium da usare. Se assente: Chrome installato, altrimenti Chromium scaricato in `data/chromium`. |
+| `FM_GOOGLE_MIN_INTERVAL_SECS` | `20` | Pausa minima tra due richieste a Google Flights. Valori bassi portano al blocco "unusual traffic". |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | | Senza, gli alert restano nell'interfaccia e nei log. |
 | `TRAVELPAYOUTS_TOKEN` | | Abilita la fase di scan e le destinazioni "Ovunque". |
 | `FM_CACHE_TTL_MINUTES` | `60` | Query identiche più recenti vengono servite dal database. |
@@ -57,6 +58,8 @@ Tutto tramite variabili d'ambiente o file `.env` (vedi `.env.example`). Ogni var
 **LLM locale.** Con Ollama: `ollama pull llama3.1`, poi `FM_LLM_URL=http://localhost:11434/v1/chat/completions`. Nella pagina "Nuova ricerca" compare il campo per descrivere la ricerca a parole.
 
 ## Deploy su una macchina di casa
+
+Su Raspberry Pi (Linux ARM) Chromium non si può scaricare automaticamente: installalo con `sudo apt install chromium` e imposta `FM_CHROME=/usr/bin/chromium`.
 
 ```sh
 cargo build --release
@@ -88,17 +91,16 @@ L'IP residenziale è voluto: riduce i blocchi anti-bot e rende inutili i proxy. 
 crates/
   domain/     tipi del dominio, nessun I/O
   geo/        dataset di riferimento e risoluzione dei luoghi in aeroporti IATA
-  providers/  trait FlightProvider, Google Flights (worker), Travelpayouts, bridge per worker esterni
+  providers/  trait FlightProvider, Google Flights (HTTP + Chromium headless), Travelpayouts
   planner/    ricerca → query, dedup, budget, scan → verify, filtri, combinazioni, polling adattivo
   storage/    SQLite con sqlx (query verificate a compile time), migrazioni
   alerts/     regole, messaggi, notifica Telegram
   web/        motore, scheduler, CLI, Axum + Askama + htmx
-workers/      google_flights.py: scarica i risultati con fast-flights e restituisce il payload grezzo
 fixtures/     risposte registrate per i test (vedi fixtures/README.md)
 data/         aeroporti (OurAirports), paesi, compagnie (OpenFlights), città con più aeroporti
 ```
 
-Il worker Python fa solo ciò che in Rust richiederebbe strumenti meno maturi: la richiesta con impronta TLS da browser (via `fast-flights`/`primp`). Codifica della query, parsing, normalizzazione e tutta la logica restano in Rust. Il contratto è JSON su stdin/stdout: una richiesta, una risposta, `{"status": "ok", "result": ...}` oppure `{"status": "error", "kind": ...}`.
+Tutto è in Rust. Google Flights include i risultati nella pagina solo per le ricerche che ha già in cache; per le altre li carica dopo con una chiamata firmata dal suo JavaScript anti-bot. Il provider fa prima una richiesta HTTP semplice e, se la pagina non contiene voli, la apre in Chromium headless (`chromiumoxide`) e intercetta la risposta. La query (`tfs`) è un protobuf codificato a mano.
 
 Una sola query a Google Flights può coprire fino a 7 aeroporti per lato: la ricerca "Calabria → Tokyo" su 3 date costa 3 query, non 18.
 
@@ -108,7 +110,6 @@ Una sola query a Google Flights può coprire fino a 7 aeroporti per lato: la ric
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --all --check
-workers/.venv/bin/python -m unittest discover -s workers -p "test_*.py"
 ```
 
 Le query SQL sono verificate a compile time anche offline grazie a `.sqlx/`. Dopo aver cambiato una query: `./scripts/sqlx-prepare.sh` (richiede `cargo install sqlx-cli --no-default-features --features sqlite,rustls`).

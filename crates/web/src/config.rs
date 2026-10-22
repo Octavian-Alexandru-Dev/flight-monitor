@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use clap::Args;
-use providers::{ExternalWorker, FlightProvider, GoogleFlights, Travelpayouts};
+use providers::{ChromeSource, FlightProvider, GoogleFlights, HeadlessBrowser, Travelpayouts};
 
 /// Runtime settings, read from flags or environment (`.env` is loaded at startup).
 #[derive(Args, Clone, Debug)]
@@ -23,35 +23,18 @@ pub struct Config {
     /// Public base URL of the web UI, for links in notifications.
     #[arg(long, env = "FM_PUBLIC_URL", global = true)]
     pub public_url: Option<String>,
-    #[arg(
-        long,
-        env = "FM_PYTHON",
-        default_value = "workers/.venv/bin/python",
-        global = true
-    )]
-    pub python: PathBuf,
-    #[arg(
-        long,
-        env = "FM_GOOGLE_WORKER",
-        default_value = "workers/google_flights.py",
-        global = true
-    )]
-    pub google_worker: PathBuf,
+    /// Chrome or Chromium used when Google does not embed the results in the page.
+    /// When unset, an installed Chrome is used or Chromium is downloaded into the data dir.
+    #[arg(long, env = "FM_CHROME", global = true)]
+    pub chrome: Option<PathBuf>,
     /// Minimum pause between two Google Flights requests.
     #[arg(
         long,
         env = "FM_GOOGLE_MIN_INTERVAL_SECS",
-        default_value_t = 12,
+        default_value_t = 20,
         global = true
     )]
     pub google_min_interval_secs: u64,
-    #[arg(
-        long,
-        env = "FM_WORKER_TIMEOUT_SECS",
-        default_value_t = 60,
-        global = true
-    )]
-    pub worker_timeout_secs: u64,
     #[arg(
         long,
         env = "TELEGRAM_BOT_TOKEN",
@@ -114,15 +97,17 @@ impl Config {
         }
     }
 
-    pub fn google_flights(&self) -> Arc<dyn FlightProvider> {
-        let worker = ExternalWorker::new(
-            &self.python,
-            vec![self.google_worker.display().to_string()],
-            Duration::from_secs(self.worker_timeout_secs),
-        );
-        Arc::new(GoogleFlights::new(
-            worker,
+    pub fn headless_browser(&self) -> HeadlessBrowser {
+        HeadlessBrowser::new(ChromeSource {
+            executable: self.chrome.clone(),
+            download_dir: self.data_dir.join("chromium"),
+        })
+    }
+
+    pub fn google_flights(&self) -> anyhow::Result<Arc<dyn FlightProvider>> {
+        Ok(Arc::new(GoogleFlights::new(
+            self.headless_browser(),
             Duration::from_secs(self.google_min_interval_secs),
-        ))
+        )?))
     }
 }

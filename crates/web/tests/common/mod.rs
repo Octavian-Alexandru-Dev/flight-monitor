@@ -39,8 +39,7 @@ impl FixtureProvider {
     pub fn new() -> Self {
         let raw = std::fs::read(root().join("fixtures/google_flights/one_way_multi_airport.json"))
             .unwrap();
-        let envelope: serde_json::Value = serde_json::from_slice(&raw).unwrap();
-        let reply: GoogleReply = serde_json::from_value(envelope["result"].clone()).unwrap();
+        let reply: GoogleReply = serde_json::from_slice(&raw).unwrap();
         let query = ProviderQuery {
             legs: vec![QueryLeg::on(
                 vec![iata("FCO"), iata("MXP")],
