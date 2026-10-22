@@ -1,6 +1,5 @@
-mod cli;
-
 use clap::Parser;
+use web::cli::Cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -11,5 +10,5 @@ async fn main() -> anyhow::Result<()> {
                 .unwrap_or_else(|_| "info,sqlx=warn".into()),
         )
         .init();
-    cli::Cli::parse().run().await
+    Cli::parse().run().await
 }
